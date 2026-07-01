@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Molecular Genetics — Quiz Hub</title>
+<style>
+  :root{
+    --ink:#0a0e14; --ink-2:#0f1620; --panel:#121b28; --panel-2:#16212f;
+    --line:#1f2d3f; --line-2:#293a50;
+    --text:#e6edf5; --muted:#8598ad; --faint:#5a6b82;
+    --mono:'SF Mono',ui-monospace,'Cascadia Code','JetBrains Mono',Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;background:var(--ink);color:var(--text);font-family:var(--sans);line-height:1.55;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background-image:radial-gradient(1100px 560px at 82% -8%,rgba(56,189,248,0.07),transparent 62%),radial-gradient(900px 520px at -12% 108%,rgba(52,211,153,0.05),transparent 60%);
+  }
+
+  /* ambient molecular backdrop */
+  .bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+  .bg svg{position:absolute;height:100%;}
+  /* helices sit in the gutters just outside the ~960px content column, pulled toward centre */
+  .bg .helix-l{left:calc(50% - 620px);top:0;opacity:.42;}
+  .bg .helix-r{left:calc(50% + 530px);top:0;opacity:.34;}
+  .bg .strand{fill:none;stroke-width:2.4;}
+  .bg .rung{stroke-width:2;}
+  .bg .node{stroke:none;}
+  .bg .cross{position:absolute;color:var(--line-2);opacity:.5;}
+  .bg .cross svg{position:static;height:auto;}
+  .wrap{position:relative;z-index:1;}
+  @media(prefers-reduced-motion:no-preference){
+    .bg .helix-l,.bg .helix-r{animation:drift 26s ease-in-out infinite alternate;}
+    .bg .helix-r{animation-duration:32s;}
+  }
+  @keyframes drift{from{transform:translateY(0)}to{transform:translateY(-26px)}}
+  /* on narrow screens the gutters vanish — tuck helices back to the edges, more transparent */
+  @media(max-width:1080px){
+    .bg .helix-l{left:-46px;opacity:.3;}
+    .bg .helix-r{left:auto;right:-46px;opacity:.24;}
+  }
+
+  /* floating molecule particles */
+  .bg .float{position:absolute;opacity:0;will-change:transform,opacity;}
+  .bg .float svg{position:static;height:auto;display:block;}
+  @media(prefers-reduced-motion:no-preference){
+    .bg .float{animation:rise linear infinite;}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .bg .float{opacity:.16;}
+  }
+  @keyframes rise{
+    0%{opacity:0;transform:translateY(20px) rotate(0deg);}
+    12%{opacity:var(--peak,.22);}
+    88%{opacity:var(--peak,.22);}
+    100%{opacity:0;transform:translateY(-120px) rotate(var(--spin,40deg));}
+  }
+
+  .wrap{max-width:960px;margin:0 auto;padding:48px 20px 100px;}
+
+  /* header */
+  .eyebrow{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--accent);border:1px solid var(--line-2);padding:7px 14px;border-radius:20px;background:rgba(56,189,248,0.1);color:#7dd3fc;margin-bottom:22px;}
+  h1{font-family:var(--mono);font-weight:700;font-size:clamp(30px,7vw,50px);line-height:1.05;letter-spacing:-.02em;margin:0 0 8px;}
+  h1 .flow{background:linear-gradient(100deg,#38bdf8,#818cf8 55%,#34d399);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .lede{color:var(--muted);font-size:16px;max-width:56ch;margin:0 0 12px;}
+  .dogma{font-family:var(--mono);font-size:13px;color:var(--faint);margin:0 0 44px;letter-spacing:.02em;}
+  .dogma b{color:var(--muted);font-weight:600;}
+
+  /* lecture cards */
+  .grid{display:grid;grid-template-columns:1fr;gap:14px;}
+  @media(min-width:640px){.grid{grid-template-columns:1fr 1fr;}}
+
+  .card{
+    position:relative;display:flex;align-items:center;gap:16px;text-decoration:none;color:inherit;
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 18px;
+    transition:border-color .16s,transform .08s,background .16s;overflow:hidden;
+  }
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c,#38bdf8);opacity:.9;}
+  .card.live:active{transform:scale(.99);}
+  @media(hover:hover){.card.live:hover{border-color:var(--c);background:var(--panel-2);}}
+  .card.soon{opacity:.62;cursor:default;}
+
+  .num{font-family:var(--mono);font-weight:700;font-size:15px;color:var(--c,#38bdf8);
+    width:46px;height:46px;flex:none;border:1px solid var(--line-2);border-radius:12px;
+    display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--c) 12%,transparent);}
+  .body{flex:1;min-width:0;}
+  .body .title{font-size:17px;font-weight:600;letter-spacing:-.01em;margin:0 0 3px;}
+  .body .meta{font-family:var(--mono);font-size:12.5px;color:var(--muted);}
+  .arrow{font-family:var(--mono);font-size:18px;color:var(--faint);flex:none;transition:transform .16s,color .16s;}
+  @media(hover:hover){.card.live:hover .arrow{color:var(--c);transform:translateX(3px);}}
+  .badge{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--faint);border:1px solid var(--line);border-radius:6px;padding:3px 8px;flex:none;}
+
+  .foot{margin-top:40px;font-family:var(--mono);font-size:12.5px;color:var(--faint);text-align:center;}
+</style>
+</head>
+<body>
+<div class="bg" id="bg" aria-hidden="true"></div>
+<div class="wrap">
+  <span class="eyebrow">Medical Sciences · Molecular Genetics</span>
+  <h1>Genetics <span class="flow">Quiz Hub</span></h1>
+  <p class="lede">Self-test decks built from the lecture slides. Instant feedback on every question, a score at the end. Pick a topic to begin.</p>
+  <p class="dogma"><b>DNA</b> &rarr; replication &rarr; mutation &rarr; repair &nbsp;·&nbsp; <b>DNA</b> &rarr; transcription &rarr; <b>RNA</b> &rarr; translation &rarr; <b>protein</b></p>
+
+  <div class="grid">
+    <a class="card live" style="--c:#38bdf8" href="lecture-1-dna-replication.html">
+      <span class="num">01</span>
+      <span class="body">
+        <p class="title">DNA Replication</p>
+        <span class="meta">35 questions · enzymes, forks, telomeres</span>
+      </span>
+      <span class="arrow">&rarr;</span>
+    </a>
+
+    <a class="card live" style="--c:#f472b6" href="lecture-2-dna-mutations.html">
+      <span class="num">02</span>
+      <span class="body">
+        <p class="title">DNA Mutations</p>
+        <span class="meta">22 questions · point, frameshift, repeats</span>
+      </span>
+      <span class="arrow">&rarr;</span>
+    </a>
+
+    <a class="card live" style="--c:#34d399" href="lecture-3-dna-repair.html">
+      <span class="num">03</span>
+      <span class="body">
+        <p class="title">DNA Repair</p>
+        <span class="meta">22 questions · excision, mismatch, breaks</span>
+      </span>
+      <span class="arrow">&rarr;</span>
+    </a>
+
+    <a class="card live" style="--c:#818cf8" href="lecture-4-transcription.html">
+      <span class="num">04</span>
+      <span class="body">
+        <p class="title">Transcription</p>
+        <span class="meta">23 questions · RNA pol, splicing, capping</span>
+      </span>
+      <span class="arrow">&rarr;</span>
+    </a>
+
+    <a class="card live" style="--c:#fbbf24" href="lecture-5-translation.html">
+      <span class="num">05</span>
+      <span class="body">
+        <p class="title">Translation</p>
+        <span class="meta">24 questions · ribosomes, tRNA, elongation</span>
+      </span>
+      <span class="arrow">&rarr;</span>
+    </a>
+  </div>
+
+  <p class="foot">Tap a topic → answer → see the correct answer instantly → get your score.</p>
+</div>
+
+<script>
+/* Draws two DNA double-helix ribbons down the side margins plus scattered medical crosses. */
+(function(){
+  const bg = document.getElementById('bg');
+  const H = 1600;              // virtual height of one helix tile
+  const AMP = 26;              // horizontal swing
+  const CX = 40;               // centre x
+  const TURN = 190;            // vertical distance per half-turn
+  const STEP = 5;              // path smoothness
+  const RUNGS = 3.2;           // rung spacing factor (per ~ this many steps of 10)
+
+  function helix(className, hue){
+    const svgns='http://www.w3.org/2000/svg';
+    const svg=document.createElementNS(svgns,'svg');
+    svg.setAttribute('viewBox',`0 0 90 ${H}`);
+    svg.setAttribute('width','90');
+    svg.setAttribute('class',className);
+    svg.setAttribute('preserveAspectRatio','xMidYMin slice');
+
+    // two sine strands, phase-shifted by PI
+    let p1='',p2='';
+    for(let y=0;y<=H;y+=STEP){
+      const t=(y/TURN)*Math.PI;
+      const x1=CX+AMP*Math.sin(t);
+      const x2=CX+AMP*Math.sin(t+Math.PI);
+      p1+=(y===0?'M':'L')+x1.toFixed(1)+' '+y+' ';
+      p2+=(y===0?'M':'L')+x2.toFixed(1)+' '+y+' ';
+    }
+    const s1=document.createElementNS(svgns,'path');
+    s1.setAttribute('d',p1);s1.setAttribute('class','strand');s1.setAttribute('stroke',hue.strand);
+    const s2=document.createElementNS(svgns,'path');
+    s2.setAttribute('d',p2);s2.setAttribute('class','strand');s2.setAttribute('stroke',hue.strand2);
+    svg.appendChild(s1);svg.appendChild(s2);
+
+    // base-pair rungs + nodes
+    for(let y=18;y<=H-18;y+=Math.round(TURN/RUNGS)){
+      const t=(y/TURN)*Math.PI;
+      const x1=CX+AMP*Math.sin(t), x2=CX+AMP*Math.sin(t+Math.PI);
+      const near=Math.abs(Math.sin(t)); // fade rungs as strands cross
+      const rung=document.createElementNS(svgns,'line');
+      rung.setAttribute('x1',x1.toFixed(1));rung.setAttribute('y1',y);
+      rung.setAttribute('x2',x2.toFixed(1));rung.setAttribute('y2',y);
+      rung.setAttribute('class','rung');
+      rung.setAttribute('stroke',hue.rung);
+      rung.setAttribute('stroke-opacity',(0.25+0.55*near).toFixed(2));
+      svg.appendChild(rung);
+      [[x1,hue.strand],[x2,hue.strand2]].forEach(([x,c])=>{
+        const n=document.createElementNS(svgns,'circle');
+        n.setAttribute('cx',x.toFixed(1));n.setAttribute('cy',y);n.setAttribute('r','2.6');
+        n.setAttribute('class','node');n.setAttribute('fill',c);
+        svg.appendChild(n);
+      });
+    }
+    return svg;
+  }
+
+  bg.appendChild(helix('helix-l',{strand:'#38bdf8',strand2:'#818cf8',rung:'#2b3a52'}));
+  bg.appendChild(helix('helix-r',{strand:'#34d399',strand2:'#38bdf8',rung:'#2b3a52'}));
+
+  // scattered medical crosses
+  const crossSvg='<svg width="W" height="W" viewBox="0 0 24 24"><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z" fill="currentColor"/></svg>';
+  const spots=[
+    {t:'12%',l:'22%',s:26,o:.35},{t:'30%',l:'86%',s:18,o:.3},
+    {t:'58%',l:'12%',s:20,o:.28},{t:'72%',l:'80%',s:30,o:.32},
+    {t:'88%',l:'30%',s:16,o:.25},{t:'44%',l:'64%',s:14,o:.22},
+    {t:'6%',l:'54%',s:16,o:.24},{t:'92%',l:'62%',s:22,o:.3}
+  ];
+  spots.forEach(sp=>{
+    const d=document.createElement('div');
+    d.className='cross';
+    d.style.top=sp.t;d.style.left=sp.l;d.style.opacity=sp.o;
+    d.innerHTML=crossSvg.replace(/W/g,sp.s);
+    bg.appendChild(d);
+  });
+
+  /* ---- floating molecules ---- */
+  const PALETTE=['#38bdf8','#818cf8','#34d399','#f472b6','#fbbf24'];
+  // each returns an SVG string given a color c
+  const SHAPES=[
+    // base-pair fragment: two nodes joined by a rung
+    c=>`<svg width="46" height="18" viewBox="0 0 46 18"><line x1="7" y1="9" x2="39" y2="9" stroke="${c}" stroke-width="1.6" stroke-opacity=".6"/><circle cx="7" cy="9" r="5" fill="${c}"/><circle cx="39" cy="9" r="5" fill="${c}"/></svg>`,
+    // triangular 3-atom molecule (like H2O)
+    c=>`<svg width="40" height="36" viewBox="0 0 40 36"><line x1="20" y1="10" x2="8" y2="28" stroke="${c}" stroke-width="1.6" stroke-opacity=".55"/><line x1="20" y1="10" x2="32" y2="28" stroke="${c}" stroke-width="1.6" stroke-opacity=".55"/><circle cx="20" cy="10" r="6" fill="${c}"/><circle cx="8" cy="28" r="4.5" fill="${c}" fill-opacity=".8"/><circle cx="32" cy="28" r="4.5" fill="${c}" fill-opacity=".8"/></svg>`,
+    // 4-node ring
+    c=>`<svg width="38" height="38" viewBox="0 0 38 38"><polygon points="19,6 32,19 19,32 6,19" fill="none" stroke="${c}" stroke-width="1.6" stroke-opacity=".5"/><circle cx="19" cy="6" r="4" fill="${c}"/><circle cx="32" cy="19" r="4" fill="${c}"/><circle cx="19" cy="32" r="4" fill="${c}"/><circle cx="6" cy="19" r="4" fill="${c}"/></svg>`,
+    // small central atom with two satellites
+    c=>`<svg width="44" height="24" viewBox="0 0 44 24"><line x1="10" y1="12" x2="22" y2="12" stroke="${c}" stroke-width="1.6" stroke-opacity=".55"/><line x1="22" y1="12" x2="34" y2="12" stroke="${c}" stroke-width="1.6" stroke-opacity=".55"/><circle cx="22" cy="12" r="6" fill="${c}"/><circle cx="10" cy="12" r="4" fill="${c}" fill-opacity=".8"/><circle cx="34" cy="12" r="4" fill="${c}" fill-opacity=".8"/></svg>`,
+    // tiny plus cross
+    c=>`<svg width="20" height="20" viewBox="0 0 24 24"><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z" fill="${c}"/></svg>`
+  ];
+
+  function rand(a,b){return a+Math.random()*(b-a);}
+  const COUNT = window.innerWidth < 640 ? 9 : 15;
+  for(let i=0;i<COUNT;i++){
+    const el=document.createElement('div');
+    el.className='float';
+    const c=PALETTE[Math.floor(Math.random()*PALETTE.length)];
+    const shape=SHAPES[Math.floor(Math.random()*SHAPES.length)];
+    el.innerHTML=shape(c);
+    const scale=rand(0.6,1.25);
+    el.style.left=rand(3,95).toFixed(1)+'%';
+    el.style.top=rand(4,94).toFixed(1)+'%';
+    el.firstChild.style.transform=`scale(${scale.toFixed(2)})`;
+    el.style.setProperty('--peak',rand(0.12,0.28).toFixed(2));
+    el.style.setProperty('--spin',(rand(-60,60)).toFixed(0)+'deg');
+    el.style.animationDuration=rand(16,30).toFixed(1)+'s';
+    el.style.animationDelay=(-rand(0,24)).toFixed(1)+'s';
+    bg.appendChild(el);
+  }
+})();
+</script>
+</body>
+</html>

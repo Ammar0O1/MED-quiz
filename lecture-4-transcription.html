@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Transcription — Quiz</title>
+<style>
+  :root{
+    --ink:#0a0e14; --ink-2:#0f1620; --panel:#121b28; --panel-2:#16212f;
+    --line:#1f2d3f; --line-2:#293a50;
+    --text:#e6edf5; --muted:#8598ad; --faint:#5a6b82;
+    --accent:#818cf8; --accent-2:#6366f1; --accent-soft:rgba(129,140,248,0.12);
+    --good:#34d399; --good-soft:rgba(52,211,153,0.14); --good-line:rgba(52,211,153,0.5);
+    --bad:#f87171; --bad-soft:rgba(248,113,113,0.13); --bad-line:rgba(248,113,113,0.5);
+    --gold:#fbbf24;
+    --mono:'SF Mono',ui-monospace,'Cascadia Code','JetBrains Mono',Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;background:var(--ink);color:var(--text);font-family:var(--sans);
+    line-height:1.55;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background-image:radial-gradient(1200px 600px at 80% -10%,rgba(56,189,248,0.06),transparent 60%),radial-gradient(900px 500px at -10% 110%,rgba(56,189,248,0.05),transparent 60%);
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:22px 18px 96px;}
+
+  /* top bar */
+  .top{display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap;}
+  .back{
+    display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--muted);
+    font-family:var(--mono);font-size:13px;padding:9px 14px;border:1px solid var(--line);
+    border-radius:11px;background:var(--panel);transition:.15s;
+  }
+  .back:active{background:var(--panel-2);}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--accent);
+    text-transform:uppercase;border:1px solid var(--line-2);padding:6px 12px;border-radius:20px;background:var(--accent-soft);}
+
+  h1{font-family:var(--mono);font-size:clamp(26px,6vw,38px);font-weight:700;letter-spacing:-.01em;
+    margin:6px 0 6px;line-height:1.1;}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 22px;max-width:60ch;}
+
+  /* progress */
+  .progress-wrap{position:sticky;top:8px;z-index:20;margin-bottom:26px;}
+  .progress-card{background:rgba(15,22,32,0.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid var(--line);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:14px;}
+  .progress-meta{font-family:var(--mono);font-size:12.5px;color:var(--muted);white-space:nowrap;}
+  .progress-meta b{color:var(--text);}
+  .bar{flex:1;height:7px;background:var(--ink-2);border-radius:99px;overflow:hidden;border:1px solid var(--line);}
+  .bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent-2),var(--accent));
+    border-radius:99px;transition:width .35s cubic-bezier(.4,0,.2,1);}
+  .score-pill{font-family:var(--mono);font-size:12.5px;color:var(--good);white-space:nowrap;}
+
+  /* question card */
+  .q{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 18px;margin-bottom:16px;
+    scroll-margin-top:90px;}
+  .q-head{display:flex;gap:12px;align-items:baseline;margin-bottom:14px;}
+  .q-num{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700;flex:none;
+    border:1px solid var(--line-2);background:var(--accent-soft);border-radius:8px;padding:3px 9px;min-width:44px;text-align:center;}
+  .q-text{font-size:16.5px;font-weight:600;line-height:1.5;letter-spacing:-.005em;}
+  .opts{display:flex;flex-direction:column;gap:9px;margin-top:4px;}
+  .opt{
+    display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;
+    background:var(--panel-2);border:1px solid var(--line);border-radius:12px;
+    padding:14px 15px;color:var(--text);font-size:15.5px;font-family:inherit;line-height:1.45;
+    cursor:pointer;transition:border-color .15s,background .15s,transform .06s;
+  }
+  .opt:active{transform:scale(.994);}
+  @media(hover:hover){.opt:not(:disabled):hover{border-color:var(--accent-2);background:var(--panel);}}
+  .opt .tag{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--muted);flex:none;
+    width:24px;height:24px;border-radius:7px;border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .opt .txt{flex:1;}
+  .opt:disabled{cursor:default;}
+  .opt.correct{background:var(--good-soft);border-color:var(--good-line);}
+  .opt.correct .tag{color:var(--good);border-color:var(--good-line);background:var(--good-soft);}
+  .opt.wrong{background:var(--bad-soft);border-color:var(--bad-line);}
+  .opt.wrong .tag{color:var(--bad);border-color:var(--bad-line);background:var(--bad-soft);}
+  .opt .mark{margin-left:auto;font-family:var(--mono);font-size:13px;font-weight:700;flex:none;align-self:center;}
+  .opt.correct .mark{color:var(--good);}
+  .opt.wrong .mark{color:var(--bad);}
+
+  .explain{margin-top:13px;border-left:3px solid var(--accent-2);background:var(--ink-2);
+    border-radius:0 10px 10px 0;padding:12px 15px;font-size:14.5px;color:var(--muted);display:none;}
+  .explain.show{display:block;animation:fade .25s ease;}
+  .explain b{color:var(--text);font-weight:600;}
+  @keyframes fade{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+
+  /* result */
+  .result{background:linear-gradient(160deg,var(--panel),var(--ink-2));border:1px solid var(--line-2);
+    border-radius:18px;padding:30px 22px;text-align:center;margin-top:8px;display:none;}
+  .result.show{display:block;animation:fade .3s ease;}
+  .result .verdict{font-family:var(--mono);font-size:14px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px;}
+  .result.pass .verdict{color:var(--good);}
+  .result.fail .verdict{color:var(--gold);}
+  .result .big{font-family:var(--mono);font-size:56px;font-weight:700;line-height:1;margin:6px 0;}
+  .result .detail{color:var(--muted);font-size:15px;margin-bottom:20px;}
+  .result .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .btn{font-family:var(--mono);font-size:14px;padding:12px 20px;border-radius:11px;border:1px solid var(--line-2);
+    background:var(--panel-2);color:var(--text);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:.15s;}
+  .btn:active{transform:scale(.97);}
+  .btn.primary{background:var(--accent-2);border-color:var(--accent);color:#04121c;font-weight:700;}
+
+  .submit-row{margin-top:8px;text-align:center;}
+  .submit-btn{font-family:var(--mono);font-size:15px;font-weight:700;padding:15px 30px;border-radius:13px;
+    border:1px solid var(--accent);background:var(--accent-2);color:#04121c;cursor:pointer;transition:.15s;width:100%;max-width:340px;}
+  .submit-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .submit-btn:not(:disabled):active{transform:scale(.98);}
+  .hint{font-family:var(--mono);font-size:12.5px;color:var(--faint);margin-top:12px;}
+
+  @media(min-width:768px){
+    .wrap{padding:34px 26px 110px;}
+    .q{padding:24px 24px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="index.html">&larr; All lectures</a>
+    <span class="eyebrow">Lecture 04 · Molecular Genetics</span>
+  </div>
+  <h1>Transcription</h1>
+  <p class="sub">RNA polymerases, promoters and enhancers, splicing, capping, and polyadenylation. Tap an answer to lock it in and see instant feedback.</p>
+
+  <div class="progress-wrap">
+    <div class="progress-card">
+      <span class="progress-meta"><b id="answered">0</b>/<span id="total">0</span> answered</span>
+      <div class="bar"><i id="barfill"></i></div>
+      <span class="score-pill" id="scorepill">0 correct</span>
+    </div>
+  </div>
+
+  <div id="quiz"></div>
+
+  <div class="submit-row" id="submitRow">
+    <button class="submit-btn" id="submitBtn" disabled>Finish &amp; see score</button>
+    <div class="hint" id="hint">Answer all questions to finish</div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="verdict" id="verdict"></div>
+    <div class="big" id="bigscore"></div>
+    <div class="detail" id="resultDetail"></div>
+    <div class="actions">
+      <button class="btn primary" onclick="retry()">Try again</button>
+      <a class="btn" href="index.html">Back to lectures</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== Question bank =====
+   answer = index of correct option. Options are shuffled at render so position carries no signal. */
+const QUESTIONS = [
+  {
+    "q": "Which two features chemically distinguish RNA made during transcription from the DNA template?",
+    "options": [
+      "It uses ribonucleotides and contains uracil instead of thymine",
+      "It uses deoxyribonucleotides and contains thymine instead of uracil",
+      "It uses ribonucleotides and contains thymine instead of uracil",
+      "It uses deoxyribonucleotides and lacks a phosphate backbone"
+    ],
+    "answer": 0,
+    "e": "RNA is built from ribonucleotides and substitutes uracil for thymine; DNA uses deoxyribonucleotides and thymine."
+  },
+  {
+    "q": "In what direction does RNA polymerase synthesize RNA, and which DNA strand does it read?",
+    "options": [
+      "5' to 3', reading the template strand",
+      "3' to 5', reading the coding strand",
+      "5' to 3', reading the coding strand",
+      "3' to 5', reading the template strand"
+    ],
+    "answer": 0,
+    "e": "RNA is synthesized 5'→3'; the enzyme reads the template (antisense) strand, producing RNA identical in sequence to the coding strand (with U for T)."
+  },
+  {
+    "q": "How does RNA polymerase differ from DNA polymerase regarding initiation?",
+    "options": [
+      "RNA polymerase does not require a primer to begin synthesis",
+      "RNA polymerase requires two primers to begin",
+      "RNA polymerase can only extend an existing DNA strand",
+      "RNA polymerase synthesizes only in the 3'→5' direction"
+    ],
+    "answer": 0,
+    "e": "Unlike DNA polymerase, RNA polymerase can initiate a new chain de novo — no primer needed. It binds promoter regions and opens the helix."
+  },
+  {
+    "q": "Which type of RNA carries the code that specifies the amino acid sequence of a protein?",
+    "options": [
+      "Messenger RNA (mRNA)",
+      "Ribosomal RNA (rRNA)",
+      "Transfer RNA (tRNA)",
+      "Small nuclear RNA (snRNA)"
+    ],
+    "answer": 0,
+    "e": "mRNA carries the coding sequence read during translation; rRNA forms ribosomes and tRNA delivers amino acids."
+  },
+  {
+    "q": "In eukaryotes, which RNA polymerase transcribes mRNA?",
+    "options": [
+      "RNA polymerase II",
+      "RNA polymerase I",
+      "RNA polymerase III",
+      "A single multi-subunit polymerase for all RNA"
+    ],
+    "answer": 0,
+    "e": "Pol II makes mRNA; Pol I makes most rRNA; Pol III makes tRNA and small RNAs. (Prokaryotes use a single polymerase for all types.)"
+  },
+  {
+    "q": "Alpha-amanitin, the toxin of death cap mushrooms, causes liver failure by inhibiting:",
+    "options": [
+      "RNA polymerase II",
+      "Bacterial RNA polymerase",
+      "DNA polymerase γ",
+      "The spliceosome"
+    ],
+    "answer": 0,
+    "e": "Alpha-amanitin (Amanita phalloides) is a potent inhibitor of RNA polymerase II and is taken up by hepatocytes, causing liver failure."
+  },
+  {
+    "q": "Rifampin, used to treat tuberculosis, works by inhibiting:",
+    "options": [
+      "Bacterial RNA polymerase",
+      "Eukaryotic RNA polymerase II",
+      "The bacterial ribosome",
+      "DNA gyrase"
+    ],
+    "answer": 0,
+    "e": "Rifampin selectively inhibits bacterial RNA polymerase, blocking transcription in the pathogen."
+  },
+  {
+    "q": "What is the function of a promoter region?",
+    "options": [
+      "It binds RNA polymerase and transcription factors but is not itself transcribed",
+      "It is transcribed into the protein-coding portion of mRNA",
+      "It removes introns from the primary transcript",
+      "It adds the poly-A tail to the 3' end"
+    ],
+    "answer": 0,
+    "e": "Promoters are DNA regions upstream of the gene that recruit RNA polymerase and transcription factors; they are not transcribed into the mRNA product."
+  },
+  {
+    "q": "The TATA box is:",
+    "options": [
+      "A common eukaryotic promoter element that binds transcription factors (TFIID)",
+      "A sequence that signals polyadenylation",
+      "The 5' cap added to mRNA",
+      "The intron/exon boundary sequence"
+    ],
+    "answer": 0,
+    "e": "The TATA box (TATAAA) is a frequent eukaryotic promoter element bound by transcription factor TFIID during initiation."
+  },
+  {
+    "q": "How do enhancers increase transcription even when located far from the gene in linear sequence?",
+    "options": [
+      "DNA coiling brings them geometrically close to the promoter, where bound activators stabilize the transcription machinery",
+      "They are copied into the mRNA and boost its stability",
+      "They physically move to sit directly beside the start site",
+      "They block repressors from entering the nucleus"
+    ],
+    "answer": 0,
+    "e": "Enhancers bind activator proteins; DNA looping/coiling positions them near the promoter to stabilize RNA polymerase and transcription factors, raising the rate."
+  },
+  {
+    "q": "Silencers reduce transcription by:",
+    "options": [
+      "Binding repressor proteins that prevent RNA polymerase binding",
+      "Adding methyl groups to the mRNA cap",
+      "Cleaving the primary transcript",
+      "Removing the poly-A tail"
+    ],
+    "answer": 0,
+    "e": "Silencers are DNA sequences that bind repressors, decreasing transcription by hindering RNA polymerase, and may lie upstream or downstream of the gene."
+  },
+  {
+    "q": "In eukaryotes, the initial transcript before processing is called:",
+    "options": [
+      "hnRNA (pre-mRNA)",
+      "Mature mRNA",
+      "rRNA",
+      "tRNA"
+    ],
+    "answer": 0,
+    "e": "The primary transcript is heterogeneous nuclear RNA (hnRNA), also called pre-mRNA, which is processed into mature mRNA before leaving the nucleus."
+  },
+  {
+    "q": "Which three modifications convert eukaryotic hnRNA into mature mRNA before it leaves the nucleus?",
+    "options": [
+      "5' capping, splicing out introns, and 3' polyadenylation",
+      "5' polyadenylation, exon removal, and 3' capping",
+      "Primer removal, proofreading, and ligation",
+      "Deamination, dimer removal, and mismatch repair"
+    ],
+    "answer": 0,
+    "e": "The three key modifications are addition of the 5' cap, removal of introns by splicing, and addition of the 3' poly-A tail."
+  },
+  {
+    "q": "The 5' cap added to eukaryotic mRNA consists of:",
+    "options": [
+      "7-methylguanosine added soon after transcription begins",
+      "A run of ~200 adenosines",
+      "A GU dinucleotide at the splice site",
+      "A methylated cytosine at the start codon"
+    ],
+    "answer": 0,
+    "e": "A 7-methylguanosine cap is added to the 5' end early in transcription; it distinguishes mRNA from other RNAs and aids ribosome recognition."
+  },
+  {
+    "q": "During splicing, introns are identified by which conserved nucleotides at their ends?",
+    "options": [
+      "GU at the 5' splice site and AG at the 3' splice site",
+      "AG at the 5' end and GU at the 3' end",
+      "AAUAAA at both ends",
+      "A poly-A signal at each boundary"
+    ],
+    "answer": 0,
+    "e": "Introns characteristically begin with GU (5' splice site) and end with AG (3' splice site), which guide the spliceosome."
+  },
+  {
+    "q": "The spliceosome is composed of mRNA together with:",
+    "options": [
+      "snRNPs (small nuclear ribonucleoproteins) rich in uridine",
+      "Ribosomal subunits",
+      "Transfer RNAs and their synthetases",
+      "DNA polymerase and ligase"
+    ],
+    "answer": 0,
+    "e": "snRNPs — short U-rich RNAs complexed with proteins (U1, U2, U4, U5, U6) — assemble with the transcript to form the spliceosome that removes introns as a lariat."
+  },
+  {
+    "q": "Anti-Smith (anti-Sm) antibodies, directed against snRNP proteins, are most specifically associated with:",
+    "options": [
+      "Systemic lupus erythematosus (SLE)",
+      "Mixed connective tissue disease",
+      "Rheumatoid arthritis",
+      "Xeroderma pigmentosum"
+    ],
+    "answer": 0,
+    "e": "Anti-Sm antibodies target snRNP proteins and are seen in SLE. (Anti-RNP, against U1-associated proteins, is strongly linked to mixed connective tissue disease.)"
+  },
+  {
+    "q": "Alternative splicing is significant because it:",
+    "options": [
+      "Allows one gene to produce multiple different proteins",
+      "Removes all introns and exons equally",
+      "Prevents any protein from being made",
+      "Adds the poly-A tail more efficiently"
+    ],
+    "answer": 0,
+    "e": "By joining different combinations of exons, alternative splicing lets a single gene encode several distinct protein products."
+  },
+  {
+    "q": "What is the polyadenylation signal sequence in the mRNA?",
+    "options": [
+      "AAUAAA",
+      "TATAAA",
+      "GGGCGG",
+      "CCAAT"
+    ],
+    "answer": 0,
+    "e": "AAUAAA is the poly-A signal; it is followed ~10–30 nucleotides later by a CA site where cleavage and tail addition occur."
+  },
+  {
+    "q": "Poly-A polymerase (PAP) adds the poly-A tail using what template?",
+    "options": [
+      "No template — it adds ~200 adenosines directly to the 3' end",
+      "The template DNA strand",
+      "A short RNA primer",
+      "The 5' cap as a guide"
+    ],
+    "answer": 0,
+    "e": "PAP adds roughly 200 adenosine nucleotides to the 3' end of the mRNA without any template."
+  },
+  {
+    "q": "In eukaryotes, which parts of the primary transcript stay in the nucleus and which exit to be translated?",
+    "options": [
+      "Introns stay in the nucleus; exons exit to the cytoplasm",
+      "Exons stay in the nucleus; introns exit",
+      "Both introns and exons exit together",
+      "Neither leaves until the ribosome enters the nucleus"
+    ],
+    "answer": 0,
+    "e": "Introns are spliced out and remain in the nucleus; the joined exons form the mature mRNA that exits to the cytoplasm for translation."
+  },
+  {
+    "q": "MicroRNA (miRNA) regulates gene expression by:",
+    "options": [
+      "Binding mRNA via base pairing to block translation or promote its degradation",
+      "Adding a second 5' cap to boost translation",
+      "Splicing introns from pre-mRNA",
+      "Serving as a promoter for RNA polymerase II"
+    ],
+    "answer": 0,
+    "e": "miRNAs base-pair with target mRNAs; extensive binding can strip the poly-A tail and expose the mRNA to degradation, reducing protein output."
+  },
+  {
+    "q": "The 5' untranslated region (5' UTR) of an mRNA serves what role?",
+    "options": [
+      "It is recognized by ribosomes to initiate translation and is not itself translated",
+      "It codes for the first several amino acids",
+      "It signals the 3' cleavage site",
+      "It contains the intron/exon boundary"
+    ],
+    "answer": 0,
+    "e": "The 5' UTR lies upstream of the coding sequence, is not translated, and is recognized by ribosomes to start translation; the 3' UTR follows the stop codon."
+  }
+];
+</script>
+
+<script>
+/* ===== Quiz engine ===== */
+(function(){
+  const bank = QUESTIONS.map(q=>({...q}));
+  const quizEl = document.getElementById('quiz');
+  const totalEl = document.getElementById('total');
+  const answeredEl = document.getElementById('answered');
+  const scorepillEl = document.getElementById('scorepill');
+  const barfill = document.getElementById('barfill');
+  const submitBtn = document.getElementById('submitBtn');
+  const submitRow = document.getElementById('submitRow');
+  const hint = document.getElementById('hint');
+  const resultEl = document.getElementById('result');
+  const LETTERS = ['A','B','C','D','E','F'];
+  const PASS = 70;
+
+  let state = [];
+
+  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+  function build(){
+    quizEl.innerHTML='';
+    state = bank.map(()=>({answered:false,correct:false}));
+    totalEl.textContent = bank.length;
+
+    bank.forEach((item,qi)=>{
+      // shuffle options, track correct index
+      const order = shuffle(item.options.map((t,idx)=>({t,idx})));
+      const correctPos = order.findIndex(o=>o.idx===item.answer);
+
+      const card = document.createElement('div');
+      card.className='q';
+      card.id='q'+qi;
+
+      const head = document.createElement('div');
+      head.className='q-head';
+      head.innerHTML = `<span class="q-num">Q${String(qi+1).padStart(2,'0')}</span><span class="q-text"></span>`;
+      head.querySelector('.q-text').textContent = item.q;
+      card.appendChild(head);
+
+      const opts = document.createElement('div');
+      opts.className='opts';
+      order.forEach((o,pos)=>{
+        const b = document.createElement('button');
+        b.className='opt';
+        b.innerHTML = `<span class="tag">${LETTERS[pos]}</span><span class="txt"></span><span class="mark"></span>`;
+        b.querySelector('.txt').textContent = o.t;
+        b.addEventListener('click',()=>choose(qi,pos,correctPos,opts,exp));
+        opts.appendChild(b);
+      });
+      card.appendChild(opts);
+
+      const exp = document.createElement('div');
+      exp.className='explain';
+      exp.innerHTML = `<b>Why:</b> ${item.e}`;
+      card.appendChild(exp);
+
+      quizEl.appendChild(card);
+    });
+    update();
+  }
+
+  function choose(qi,pos,correctPos,optsEl,expEl){
+    if(state[qi].answered) return;
+    state[qi].answered=true;
+    state[qi].correct = (pos===correctPos);
+    const buttons=[...optsEl.children];
+    buttons.forEach((b,i)=>{
+      b.disabled=true;
+      if(i===correctPos){b.classList.add('correct');b.querySelector('.mark').textContent='✓';}
+      if(i===pos && pos!==correctPos){b.classList.add('wrong');b.querySelector('.mark').textContent='✗';}
+    });
+    expEl.classList.add('show');
+    update();
+  }
+
+  function update(){
+    const answered = state.filter(s=>s.answered).length;
+    const correct = state.filter(s=>s.correct).length;
+    answeredEl.textContent = answered;
+    scorepillEl.textContent = correct+' correct';
+    barfill.style.width = (answered/bank.length*100)+'%';
+    const done = answered===bank.length;
+    submitBtn.disabled = !done;
+    hint.textContent = done ? 'All answered — lock in your score' : (bank.length-answered)+' left';
+  }
+
+  submitBtn.addEventListener('click',()=>{
+    const correct = state.filter(s=>s.correct).length;
+    const pct = Math.round(correct/bank.length*100);
+    const pass = pct>=PASS;
+    resultEl.className='result show '+(pass?'pass':'fail');
+    document.getElementById('verdict').textContent = pass?'Pass':'Keep reviewing';
+    document.getElementById('bigscore').textContent = pct+'%';
+    document.getElementById('resultDetail').textContent =
+      `${correct} of ${bank.length} correct · passing mark is ${PASS}%`;
+    submitRow.style.display='none';
+    resultEl.scrollIntoView({behavior:'smooth',block:'center'});
+  });
+
+  window.retry=function(){
+    resultEl.className='result';
+    submitRow.style.display='';
+    build();
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+
+  build();
+})();
+</script>
+</body>
+</html>

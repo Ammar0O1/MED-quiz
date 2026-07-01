@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>DNA Repair — Quiz</title>
+<style>
+  :root{
+    --ink:#0a0e14; --ink-2:#0f1620; --panel:#121b28; --panel-2:#16212f;
+    --line:#1f2d3f; --line-2:#293a50;
+    --text:#e6edf5; --muted:#8598ad; --faint:#5a6b82;
+    --accent:#34d399; --accent-2:#10b981; --accent-soft:rgba(52,211,153,0.12);
+    --good:#34d399; --good-soft:rgba(52,211,153,0.14); --good-line:rgba(52,211,153,0.5);
+    --bad:#f87171; --bad-soft:rgba(248,113,113,0.13); --bad-line:rgba(248,113,113,0.5);
+    --gold:#fbbf24;
+    --mono:'SF Mono',ui-monospace,'Cascadia Code','JetBrains Mono',Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;background:var(--ink);color:var(--text);font-family:var(--sans);
+    line-height:1.55;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background-image:radial-gradient(1200px 600px at 80% -10%,rgba(56,189,248,0.06),transparent 60%),radial-gradient(900px 500px at -10% 110%,rgba(56,189,248,0.05),transparent 60%);
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:22px 18px 96px;}
+
+  /* top bar */
+  .top{display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap;}
+  .back{
+    display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--muted);
+    font-family:var(--mono);font-size:13px;padding:9px 14px;border:1px solid var(--line);
+    border-radius:11px;background:var(--panel);transition:.15s;
+  }
+  .back:active{background:var(--panel-2);}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--accent);
+    text-transform:uppercase;border:1px solid var(--line-2);padding:6px 12px;border-radius:20px;background:var(--accent-soft);}
+
+  h1{font-family:var(--mono);font-size:clamp(26px,6vw,38px);font-weight:700;letter-spacing:-.01em;
+    margin:6px 0 6px;line-height:1.1;}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 22px;max-width:60ch;}
+
+  /* progress */
+  .progress-wrap{position:sticky;top:8px;z-index:20;margin-bottom:26px;}
+  .progress-card{background:rgba(15,22,32,0.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid var(--line);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:14px;}
+  .progress-meta{font-family:var(--mono);font-size:12.5px;color:var(--muted);white-space:nowrap;}
+  .progress-meta b{color:var(--text);}
+  .bar{flex:1;height:7px;background:var(--ink-2);border-radius:99px;overflow:hidden;border:1px solid var(--line);}
+  .bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent-2),var(--accent));
+    border-radius:99px;transition:width .35s cubic-bezier(.4,0,.2,1);}
+  .score-pill{font-family:var(--mono);font-size:12.5px;color:var(--good);white-space:nowrap;}
+
+  /* question card */
+  .q{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 18px;margin-bottom:16px;
+    scroll-margin-top:90px;}
+  .q-head{display:flex;gap:12px;align-items:baseline;margin-bottom:14px;}
+  .q-num{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700;flex:none;
+    border:1px solid var(--line-2);background:var(--accent-soft);border-radius:8px;padding:3px 9px;min-width:44px;text-align:center;}
+  .q-text{font-size:16.5px;font-weight:600;line-height:1.5;letter-spacing:-.005em;}
+  .opts{display:flex;flex-direction:column;gap:9px;margin-top:4px;}
+  .opt{
+    display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;
+    background:var(--panel-2);border:1px solid var(--line);border-radius:12px;
+    padding:14px 15px;color:var(--text);font-size:15.5px;font-family:inherit;line-height:1.45;
+    cursor:pointer;transition:border-color .15s,background .15s,transform .06s;
+  }
+  .opt:active{transform:scale(.994);}
+  @media(hover:hover){.opt:not(:disabled):hover{border-color:var(--accent-2);background:var(--panel);}}
+  .opt .tag{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--muted);flex:none;
+    width:24px;height:24px;border-radius:7px;border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .opt .txt{flex:1;}
+  .opt:disabled{cursor:default;}
+  .opt.correct{background:var(--good-soft);border-color:var(--good-line);}
+  .opt.correct .tag{color:var(--good);border-color:var(--good-line);background:var(--good-soft);}
+  .opt.wrong{background:var(--bad-soft);border-color:var(--bad-line);}
+  .opt.wrong .tag{color:var(--bad);border-color:var(--bad-line);background:var(--bad-soft);}
+  .opt .mark{margin-left:auto;font-family:var(--mono);font-size:13px;font-weight:700;flex:none;align-self:center;}
+  .opt.correct .mark{color:var(--good);}
+  .opt.wrong .mark{color:var(--bad);}
+
+  .explain{margin-top:13px;border-left:3px solid var(--accent-2);background:var(--ink-2);
+    border-radius:0 10px 10px 0;padding:12px 15px;font-size:14.5px;color:var(--muted);display:none;}
+  .explain.show{display:block;animation:fade .25s ease;}
+  .explain b{color:var(--text);font-weight:600;}
+  @keyframes fade{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+
+  /* result */
+  .result{background:linear-gradient(160deg,var(--panel),var(--ink-2));border:1px solid var(--line-2);
+    border-radius:18px;padding:30px 22px;text-align:center;margin-top:8px;display:none;}
+  .result.show{display:block;animation:fade .3s ease;}
+  .result .verdict{font-family:var(--mono);font-size:14px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px;}
+  .result.pass .verdict{color:var(--good);}
+  .result.fail .verdict{color:var(--gold);}
+  .result .big{font-family:var(--mono);font-size:56px;font-weight:700;line-height:1;margin:6px 0;}
+  .result .detail{color:var(--muted);font-size:15px;margin-bottom:20px;}
+  .result .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .btn{font-family:var(--mono);font-size:14px;padding:12px 20px;border-radius:11px;border:1px solid var(--line-2);
+    background:var(--panel-2);color:var(--text);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:.15s;}
+  .btn:active{transform:scale(.97);}
+  .btn.primary{background:var(--accent-2);border-color:var(--accent);color:#04121c;font-weight:700;}
+
+  .submit-row{margin-top:8px;text-align:center;}
+  .submit-btn{font-family:var(--mono);font-size:15px;font-weight:700;padding:15px 30px;border-radius:13px;
+    border:1px solid var(--accent);background:var(--accent-2);color:#04121c;cursor:pointer;transition:.15s;width:100%;max-width:340px;}
+  .submit-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .submit-btn:not(:disabled):active{transform:scale(.98);}
+  .hint{font-family:var(--mono);font-size:12.5px;color:var(--faint);margin-top:12px;}
+
+  @media(min-width:768px){
+    .wrap{padding:34px 26px 110px;}
+    .q{padding:24px 24px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="index.html">&larr; All lectures</a>
+    <span class="eyebrow">Lecture 03 · Molecular Genetics</span>
+  </div>
+  <h1>DNA Repair</h1>
+  <p class="sub">Base and nucleotide excision repair, mismatch repair, double-strand break repair, and the diseases caused when they fail. Tap an answer to lock it in and see instant feedback.</p>
+
+  <div class="progress-wrap">
+    <div class="progress-card">
+      <span class="progress-meta"><b id="answered">0</b>/<span id="total">0</span> answered</span>
+      <div class="bar"><i id="barfill"></i></div>
+      <span class="score-pill" id="scorepill">0 correct</span>
+    </div>
+  </div>
+
+  <div id="quiz"></div>
+
+  <div class="submit-row" id="submitRow">
+    <button class="submit-btn" id="submitBtn" disabled>Finish &amp; see score</button>
+    <div class="hint" id="hint">Answer all questions to finish</div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="verdict" id="verdict"></div>
+    <div class="big" id="bigscore"></div>
+    <div class="detail" id="resultDetail"></div>
+    <div class="actions">
+      <button class="btn primary" onclick="retry()">Try again</button>
+      <a class="btn" href="index.html">Back to lectures</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== Question bank =====
+   answer = index of correct option. Options are shuffled at render so position carries no signal. */
+const QUESTIONS = [
+  {
+    "q": "Depurination refers to which type of spontaneous DNA damage?",
+    "options": [
+      "Loss of a purine base (adenine or guanine) from the sugar backbone",
+      "Loss of an amino group converting cytosine to uracil",
+      "Formation of a covalent bond between adjacent thymines",
+      "Insertion of an extra nucleotide during replication"
+    ],
+    "answer": 0,
+    "e": "Depurination breaks the glycosidic bond, removing a purine (A or G) and leaving an abasic (AP) site. It happens thousands of times per day per cell."
+  },
+  {
+    "q": "Deamination most commonly affects which base, and converts it to what?",
+    "options": [
+      "Cytosine, converting it to uracil",
+      "Adenine, converting it to guanine",
+      "Thymine, converting it to cytosine",
+      "Guanine, converting it to adenine"
+    ],
+    "answer": 0,
+    "e": "Deamination removes an amino group from cytosine, turning it into uracil — a base that doesn't belong in DNA and must be repaired."
+  },
+  {
+    "q": "Which category of DNA damage is caused by UV light from sunlight?",
+    "options": [
+      "Pyrimidine (thymine) dimers",
+      "Depurination of adenine",
+      "Cytosine deamination",
+      "Double-strand breaks"
+    ],
+    "answer": 0,
+    "e": "UV radiation covalently links adjacent pyrimidines (usually thymines) into dimers that distort the helix and block replication."
+  },
+  {
+    "q": "Ionizing radiation (X-rays, radioactive decay) is most associated with which form of DNA damage?",
+    "options": [
+      "Double-strand breaks in the phosphodiester backbone",
+      "Single-base deamination",
+      "Thymine dimer formation",
+      "Depurination only"
+    ],
+    "answer": 0,
+    "e": "Ionizing radiation carries enough energy to break the backbone on both strands, producing dangerous double-strand breaks."
+  },
+  {
+    "q": "Base excision repair specifically recognizes and removes:",
+    "options": [
+      "Single damaged bases such as deaminated or oxidized bases",
+      "Bulky multi-base lesions like pyrimidine dimers",
+      "Double-strand breaks",
+      "Mismatched but undamaged bases after replication"
+    ],
+    "answer": 0,
+    "e": "BER handles individual damaged bases (deaminated, oxidized, ring-opened) and functions throughout all phases of the cell cycle."
+  },
+  {
+    "q": "In base excision repair, what is the role of DNA glycosylase?",
+    "options": [
+      "It removes the damaged base, creating an abasic (AP) site",
+      "It nicks the phosphate backbone at the AP site",
+      "It fills the gap with a new nucleotide",
+      "It seals the final nick with a phosphodiester bond"
+    ],
+    "answer": 0,
+    "e": "Glycosylase cleaves the glycosidic bond to excise the damaged base, leaving a baseless (apurinic/apyrimidinic) nucleotide in the backbone."
+  },
+  {
+    "q": "After the base is removed in BER, which enzyme nicks the backbone at the AP site?",
+    "options": [
+      "AP endonuclease",
+      "DNA glycosylase",
+      "DNA ligase",
+      "DNA polymerase III"
+    ],
+    "answer": 0,
+    "e": "AP endonuclease recognizes the baseless site and cuts the backbone, creating a 3'-OH end so polymerase can fill in the correct nucleotide."
+  },
+  {
+    "q": "Nucleotide excision repair is chiefly used to remove:",
+    "options": [
+      "Bulky, multi-base lesions such as UV-induced pyrimidine dimers",
+      "Single deaminated bases",
+      "Mismatched bases missed by proofreading",
+      "Double-strand breaks from radiation"
+    ],
+    "answer": 0,
+    "e": "NER excises bulky, helix-distorting damage — classically pyrimidine dimers from UV — by removing a short stretch of nucleotides."
+  },
+  {
+    "q": "Xeroderma pigmentosum results from a defect in which repair pathway?",
+    "options": [
+      "Nucleotide excision repair",
+      "Base excision repair",
+      "Mismatch repair",
+      "Non-homologous end joining"
+    ],
+    "answer": 0,
+    "e": "XP is caused by defective NER, so UV damage (pyrimidine dimers) accumulates — leading to extreme sun sensitivity and very high skin cancer risk."
+  },
+  {
+    "q": "A child with extreme sensitivity to sunlight, easy sunburning, freckling, and very high skin cancer risk from early childhood most likely has:",
+    "options": [
+      "Xeroderma pigmentosum",
+      "Lynch syndrome",
+      "Ataxia telangiectasia",
+      "Fanconi anemia"
+    ],
+    "answer": 0,
+    "e": "These are the hallmark features of xeroderma pigmentosum, due to failure of nucleotide excision repair of UV damage."
+  },
+  {
+    "q": "Mismatch repair differs from base and nucleotide excision repair in that it targets:",
+    "options": [
+      "Incorrectly paired but chemically undamaged bases missed by proofreading",
+      "Chemically damaged bases only",
+      "UV-induced dimers only",
+      "Double-strand breaks only"
+    ],
+    "answer": 0,
+    "e": "MMR fixes correctly-structured but wrongly-paired bases (mismatches, small insertions/deletions) that proofreading missed — there's no chemical damage to recognize."
+  },
+  {
+    "q": "During which cell cycle phase does mismatch repair primarily act, and why?",
+    "options": [
+      "S/G2 phase, comparing the new strand to the template strand",
+      "G1 phase, before any DNA synthesis occurs",
+      "Only during mitosis",
+      "Only in non-dividing cells"
+    ],
+    "answer": 0,
+    "e": "MMR works right after synthesis (S/G2), distinguishing the newly made strand from the template to remove and reseal the erroneous nucleotides."
+  },
+  {
+    "q": "Nucleotide excision repair is most active during which phase of the cell cycle?",
+    "options": [
+      "G1 phase, prior to DNA synthesis",
+      "S phase, during replication",
+      "G2/M, after synthesis",
+      "Only in terminally differentiated cells"
+    ],
+    "answer": 0,
+    "e": "NER operates in G1, before DNA synthesis, removing bulky lesions so they aren't replicated."
+  },
+  {
+    "q": "Hereditary nonpolyposis colorectal cancer (Lynch syndrome) is caused by germline mutation of:",
+    "options": [
+      "DNA mismatch repair enzymes (commonly MLH1 and MSH2)",
+      "Nucleotide excision repair genes",
+      "The ATM gene",
+      "Homologous recombination genes"
+    ],
+    "answer": 0,
+    "e": "HNPCC results from defective mismatch repair (about 90% MLH1/MSH2), producing colon cancer via microsatellite instability, with ~80% lifetime risk."
+  },
+  {
+    "q": "Which repair mechanism uses the sister chromosome as a template to fix a double-strand break?",
+    "options": [
+      "Homologous end joining",
+      "Non-homologous end joining",
+      "Base excision repair",
+      "Mismatch repair"
+    ],
+    "answer": 0,
+    "e": "Homologous end joining uses the matching sister chromosome as a template, making it comparatively accurate."
+  },
+  {
+    "q": "Non-homologous end joining is described as highly error-prone because:",
+    "options": [
+      "It rejoins broken ends without using a template",
+      "It copies from the sister chromosome inaccurately",
+      "It removes too many correct bases",
+      "It only works on single-base damage"
+    ],
+    "answer": 0,
+    "e": "NHEJ directly ligates broken double-strand ends with no template to guide accuracy, so it frequently introduces errors."
+  },
+  {
+    "q": "Ataxia telangiectasia is caused by mutations in which gene, and affects which repair process?",
+    "options": [
+      "The ATM gene; repair of double-strand breaks via NHEJ",
+      "MLH1; mismatch repair",
+      "An NER gene; removal of pyrimidine dimers",
+      "A glycosylase gene; base excision repair"
+    ],
+    "answer": 0,
+    "e": "AT results from ATM mutations on chromosome 11, impairing double-strand break repair and causing hypersensitivity to ionizing radiation."
+  },
+  {
+    "q": "Which clinical picture fits ataxia telangiectasia?",
+    "options": [
+      "Progressive motor problems (often wheelchair by ~10), recurrent sinus/respiratory infections, telangiectasias, and high cancer risk",
+      "UV sensitivity and skin cancer beginning in infancy",
+      "Aplastic anemia with cross-link hypersensitivity",
+      "Colon cancer with microsatellite instability"
+    ],
+    "answer": 0,
+    "e": "AT features progressive ataxia, immune deficiency (recurrent infections), skin telangiectasias, and increased cancer risk from defective DSB repair."
+  },
+  {
+    "q": "Fanconi anemia is characterized by:",
+    "options": [
+      "Inherited aplastic anemia with hypersensitivity to DNA cross-linking damage",
+      "Defective nucleotide excision repair and UV sensitivity",
+      "A single trinucleotide repeat expansion",
+      "Isolated deficiency of one glycosylase"
+    ],
+    "answer": 0,
+    "e": "Fanconi anemia involves multiple genetic defects (many in repair enzymes), causing aplastic anemia, cross-link hypersensitivity, and impaired homologous recombination."
+  },
+  {
+    "q": "Why must DNA repair be so robust — what is the estimated scale of daily DNA damage per cell?",
+    "options": [
+      "Roughly 10,000 to 1,000,000 molecular lesions per day",
+      "About 10 to 100 lesions per day",
+      "Around 1 lesion per week",
+      "Damage only occurs during cell division"
+    ],
+    "answer": 0,
+    "e": "Each cell sustains an enormous number of lesions daily from endogenous and exogenous sources, so numerous overlapping repair systems are essential."
+  },
+  {
+    "q": "Reactive oxygen species that damage DNA are generated primarily as a byproduct of:",
+    "options": [
+      "Normal cellular respiration in mitochondria",
+      "UV exposure at the skin surface",
+      "Ionizing radiation only",
+      "Mismatch repair activity"
+    ],
+    "answer": 0,
+    "e": "Mitochondrial ATP production generates reactive oxygen species as a byproduct; these free radicals oxidize DNA bases (an endogenous cause of damage)."
+  },
+  {
+    "q": "After AP endonuclease creates a nick in BER, which enzymes complete the repair?",
+    "options": [
+      "DNA polymerase adds the correct nucleotide, then DNA ligase seals the strand",
+      "Helicase unwinds, then primase adds a primer",
+      "Glycosylase re-adds the base, then topoisomerase reseals",
+      "Telomerase extends the end, then ligase seals it"
+    ],
+    "answer": 0,
+    "e": "Polymerase fills the single-nucleotide gap complementary to the opposite base, and ligase seals the remaining nick to finish BER."
+  }
+];
+</script>
+
+<script>
+/* ===== Quiz engine ===== */
+(function(){
+  const bank = QUESTIONS.map(q=>({...q}));
+  const quizEl = document.getElementById('quiz');
+  const totalEl = document.getElementById('total');
+  const answeredEl = document.getElementById('answered');
+  const scorepillEl = document.getElementById('scorepill');
+  const barfill = document.getElementById('barfill');
+  const submitBtn = document.getElementById('submitBtn');
+  const submitRow = document.getElementById('submitRow');
+  const hint = document.getElementById('hint');
+  const resultEl = document.getElementById('result');
+  const LETTERS = ['A','B','C','D','E','F'];
+  const PASS = 70;
+
+  let state = [];
+
+  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+  function build(){
+    quizEl.innerHTML='';
+    state = bank.map(()=>({answered:false,correct:false}));
+    totalEl.textContent = bank.length;
+
+    bank.forEach((item,qi)=>{
+      // shuffle options, track correct index
+      const order = shuffle(item.options.map((t,idx)=>({t,idx})));
+      const correctPos = order.findIndex(o=>o.idx===item.answer);
+
+      const card = document.createElement('div');
+      card.className='q';
+      card.id='q'+qi;
+
+      const head = document.createElement('div');
+      head.className='q-head';
+      head.innerHTML = `<span class="q-num">Q${String(qi+1).padStart(2,'0')}</span><span class="q-text"></span>`;
+      head.querySelector('.q-text').textContent = item.q;
+      card.appendChild(head);
+
+      const opts = document.createElement('div');
+      opts.className='opts';
+      order.forEach((o,pos)=>{
+        const b = document.createElement('button');
+        b.className='opt';
+        b.innerHTML = `<span class="tag">${LETTERS[pos]}</span><span class="txt"></span><span class="mark"></span>`;
+        b.querySelector('.txt').textContent = o.t;
+        b.addEventListener('click',()=>choose(qi,pos,correctPos,opts,exp));
+        opts.appendChild(b);
+      });
+      card.appendChild(opts);
+
+      const exp = document.createElement('div');
+      exp.className='explain';
+      exp.innerHTML = `<b>Why:</b> ${item.e}`;
+      card.appendChild(exp);
+
+      quizEl.appendChild(card);
+    });
+    update();
+  }
+
+  function choose(qi,pos,correctPos,optsEl,expEl){
+    if(state[qi].answered) return;
+    state[qi].answered=true;
+    state[qi].correct = (pos===correctPos);
+    const buttons=[...optsEl.children];
+    buttons.forEach((b,i)=>{
+      b.disabled=true;
+      if(i===correctPos){b.classList.add('correct');b.querySelector('.mark').textContent='✓';}
+      if(i===pos && pos!==correctPos){b.classList.add('wrong');b.querySelector('.mark').textContent='✗';}
+    });
+    expEl.classList.add('show');
+    update();
+  }
+
+  function update(){
+    const answered = state.filter(s=>s.answered).length;
+    const correct = state.filter(s=>s.correct).length;
+    answeredEl.textContent = answered;
+    scorepillEl.textContent = correct+' correct';
+    barfill.style.width = (answered/bank.length*100)+'%';
+    const done = answered===bank.length;
+    submitBtn.disabled = !done;
+    hint.textContent = done ? 'All answered — lock in your score' : (bank.length-answered)+' left';
+  }
+
+  submitBtn.addEventListener('click',()=>{
+    const correct = state.filter(s=>s.correct).length;
+    const pct = Math.round(correct/bank.length*100);
+    const pass = pct>=PASS;
+    resultEl.className='result show '+(pass?'pass':'fail');
+    document.getElementById('verdict').textContent = pass?'Pass':'Keep reviewing';
+    document.getElementById('bigscore').textContent = pct+'%';
+    document.getElementById('resultDetail').textContent =
+      `${correct} of ${bank.length} correct · passing mark is ${PASS}%`;
+    submitRow.style.display='none';
+    resultEl.scrollIntoView({behavior:'smooth',block:'center'});
+  });
+
+  window.retry=function(){
+    resultEl.className='result';
+    submitRow.style.display='';
+    build();
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+
+  build();
+})();
+</script>
+</body>
+</html>

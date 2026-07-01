@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>DNA Replication — Quiz</title>
+<style>
+  :root{
+    --ink:#0a0e14; --ink-2:#0f1620; --panel:#121b28; --panel-2:#16212f;
+    --line:#1f2d3f; --line-2:#293a50;
+    --text:#e6edf5; --muted:#8598ad; --faint:#5a6b82;
+    --accent:#38bdf8; --accent-2:#0ea5e9; --accent-soft:rgba(56,189,248,0.12);
+    --good:#34d399; --good-soft:rgba(52,211,153,0.14); --good-line:rgba(52,211,153,0.5);
+    --bad:#f87171; --bad-soft:rgba(248,113,113,0.13); --bad-line:rgba(248,113,113,0.5);
+    --gold:#fbbf24;
+    --mono:'SF Mono',ui-monospace,'Cascadia Code','JetBrains Mono',Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;background:var(--ink);color:var(--text);font-family:var(--sans);
+    line-height:1.55;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background-image:radial-gradient(1200px 600px at 80% -10%,rgba(56,189,248,0.06),transparent 60%),radial-gradient(900px 500px at -10% 110%,rgba(56,189,248,0.05),transparent 60%);
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:22px 18px 96px;}
+
+  /* top bar */
+  .top{display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap;}
+  .back{
+    display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--muted);
+    font-family:var(--mono);font-size:13px;padding:9px 14px;border:1px solid var(--line);
+    border-radius:11px;background:var(--panel);transition:.15s;
+  }
+  .back:active{background:var(--panel-2);}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--accent);
+    text-transform:uppercase;border:1px solid var(--line-2);padding:6px 12px;border-radius:20px;background:var(--accent-soft);}
+
+  h1{font-family:var(--mono);font-size:clamp(26px,6vw,38px);font-weight:700;letter-spacing:-.01em;
+    margin:6px 0 6px;line-height:1.1;}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 22px;max-width:60ch;}
+
+  /* progress */
+  .progress-wrap{position:sticky;top:8px;z-index:20;margin-bottom:26px;}
+  .progress-card{background:rgba(15,22,32,0.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid var(--line);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:14px;}
+  .progress-meta{font-family:var(--mono);font-size:12.5px;color:var(--muted);white-space:nowrap;}
+  .progress-meta b{color:var(--text);}
+  .bar{flex:1;height:7px;background:var(--ink-2);border-radius:99px;overflow:hidden;border:1px solid var(--line);}
+  .bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent-2),var(--accent));
+    border-radius:99px;transition:width .35s cubic-bezier(.4,0,.2,1);}
+  .score-pill{font-family:var(--mono);font-size:12.5px;color:var(--good);white-space:nowrap;}
+
+  /* question card */
+  .q{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 18px;margin-bottom:16px;
+    scroll-margin-top:90px;}
+  .q-head{display:flex;gap:12px;align-items:baseline;margin-bottom:14px;}
+  .q-num{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700;flex:none;
+    border:1px solid var(--line-2);background:var(--accent-soft);border-radius:8px;padding:3px 9px;min-width:44px;text-align:center;}
+  .q-text{font-size:16.5px;font-weight:600;line-height:1.5;letter-spacing:-.005em;}
+  .opts{display:flex;flex-direction:column;gap:9px;margin-top:4px;}
+  .opt{
+    display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;
+    background:var(--panel-2);border:1px solid var(--line);border-radius:12px;
+    padding:14px 15px;color:var(--text);font-size:15.5px;font-family:inherit;line-height:1.45;
+    cursor:pointer;transition:border-color .15s,background .15s,transform .06s;
+  }
+  .opt:active{transform:scale(.994);}
+  @media(hover:hover){.opt:not(:disabled):hover{border-color:var(--accent-2);background:var(--panel);}}
+  .opt .tag{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--muted);flex:none;
+    width:24px;height:24px;border-radius:7px;border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .opt .txt{flex:1;}
+  .opt:disabled{cursor:default;}
+  .opt.correct{background:var(--good-soft);border-color:var(--good-line);}
+  .opt.correct .tag{color:var(--good);border-color:var(--good-line);background:var(--good-soft);}
+  .opt.wrong{background:var(--bad-soft);border-color:var(--bad-line);}
+  .opt.wrong .tag{color:var(--bad);border-color:var(--bad-line);background:var(--bad-soft);}
+  .opt .mark{margin-left:auto;font-family:var(--mono);font-size:13px;font-weight:700;flex:none;align-self:center;}
+  .opt.correct .mark{color:var(--good);}
+  .opt.wrong .mark{color:var(--bad);}
+
+  .explain{margin-top:13px;border-left:3px solid var(--accent-2);background:var(--ink-2);
+    border-radius:0 10px 10px 0;padding:12px 15px;font-size:14.5px;color:var(--muted);display:none;}
+  .explain.show{display:block;animation:fade .25s ease;}
+  .explain b{color:var(--text);font-weight:600;}
+  @keyframes fade{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+
+  /* result */
+  .result{background:linear-gradient(160deg,var(--panel),var(--ink-2));border:1px solid var(--line-2);
+    border-radius:18px;padding:30px 22px;text-align:center;margin-top:8px;display:none;}
+  .result.show{display:block;animation:fade .3s ease;}
+  .result .verdict{font-family:var(--mono);font-size:14px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px;}
+  .result.pass .verdict{color:var(--good);}
+  .result.fail .verdict{color:var(--gold);}
+  .result .big{font-family:var(--mono);font-size:56px;font-weight:700;line-height:1;margin:6px 0;}
+  .result .detail{color:var(--muted);font-size:15px;margin-bottom:20px;}
+  .result .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .btn{font-family:var(--mono);font-size:14px;padding:12px 20px;border-radius:11px;border:1px solid var(--line-2);
+    background:var(--panel-2);color:var(--text);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:.15s;}
+  .btn:active{transform:scale(.97);}
+  .btn.primary{background:var(--accent-2);border-color:var(--accent);color:#04121c;font-weight:700;}
+
+  .submit-row{margin-top:8px;text-align:center;}
+  .submit-btn{font-family:var(--mono);font-size:15px;font-weight:700;padding:15px 30px;border-radius:13px;
+    border:1px solid var(--accent);background:var(--accent-2);color:#04121c;cursor:pointer;transition:.15s;width:100%;max-width:340px;}
+  .submit-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .submit-btn:not(:disabled):active{transform:scale(.98);}
+  .hint{font-family:var(--mono);font-size:12.5px;color:var(--faint);margin-top:12px;}
+
+  @media(min-width:768px){
+    .wrap{padding:34px 26px 110px;}
+    .q{padding:24px 24px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="index.html">&larr; All lectures</a>
+    <span class="eyebrow">Lecture 01 · Molecular Genetics</span>
+  </div>
+  <h1>DNA Replication</h1>
+  <p class="sub">Enzymes, directionality, leading vs. lagging strands, proofreading, and telomeres. Tap an answer to lock it in and see instant feedback.</p>
+
+  <div class="progress-wrap">
+    <div class="progress-card">
+      <span class="progress-meta"><b id="answered">0</b>/<span id="total">0</span> answered</span>
+      <div class="bar"><i id="barfill"></i></div>
+      <span class="score-pill" id="scorepill">0 correct</span>
+    </div>
+  </div>
+
+  <div id="quiz"></div>
+
+  <div class="submit-row" id="submitRow">
+    <button class="submit-btn" id="submitBtn" disabled>Finish &amp; see score</button>
+    <div class="hint" id="hint">Answer all questions to finish</div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="verdict" id="verdict"></div>
+    <div class="big" id="bigscore"></div>
+    <div class="detail" id="resultDetail"></div>
+    <div class="actions">
+      <button class="btn primary" onclick="retry()">Try again</button>
+      <a class="btn" href="index.html">Back to lectures</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== Question bank =====
+   answer = index of correct option. Options are shuffled at render so position carries no signal. */
+const QUESTIONS = [
+  {q:"During DNA replication, in which direction does DNA polymerase synthesize the new strand?",
+   options:["5' to 3', adding nucleotides to the 3' end","3' to 5', adding nucleotides to the 5' end","5' to 3', adding nucleotides to the 5' end","3' to 5', adding nucleotides to the 3' end"],
+   answer:0, e:"Synthesis always proceeds 5'→3', with each new nucleotide added to the free 3'-OH end of the growing strand."},
+
+  {q:"Which enzyme unwinds the parental double helix at the replication fork, and what does it consume to do so?",
+   options:["Helicase, which hydrolyzes ATP","Primase, which hydrolyzes GTP","Topoisomerase, which hydrolyzes ATP","Ligase, which hydrolyzes ATP"],
+   answer:0, e:"Helicase separates the two strands by breaking hydrogen bonds, powered by ATP hydrolysis."},
+
+  {q:"Why do origins of replication tend to be AT-rich sequences?",
+   options:["A–T pairs have two hydrogen bonds, so they are easier to separate than G–C pairs","A–T pairs have three hydrogen bonds, giving the strand extra stability","AT-rich regions bind topoisomerase with higher affinity","A–T pairs are read faster by DNA polymerase III"],
+   answer:0, e:"A–T pairs form only two hydrogen bonds versus three for G–C, so AT-rich origins are energetically easier to unwind."},
+
+  {q:"What is the primary role of single-strand binding proteins during replication?",
+   options:["Stabilize and keep separated the unwound single strands","Add complementary nucleotides to the template","Remove the RNA primers after synthesis","Reseal nicks between Okazaki fragments"],
+   answer:0, e:"SSBs coat the exposed single strands, preventing them from re-annealing and protecting them until polymerase acts."},
+
+  {q:"DNA polymerase cannot begin a new strand from scratch. What solves this problem?",
+   options:["A short RNA primer laid down by primase","A short DNA primer laid down by polymerase I","A single-strand binding protein anchoring the 5' end","Helicase creating a free 3'-OH group"],
+   answer:0, e:"Primase synthesizes a short RNA primer that provides the 3'-OH DNA polymerase needs to start extension."},
+
+  {q:"How does the RNA primer differ chemically from the DNA it is later replaced by?",
+   options:["It uses ribonucleotides and contains uracil instead of thymine","It uses deoxyribonucleotides and contains uracil instead of thymine","It uses ribonucleotides and contains thymine instead of uracil","It uses deoxyribonucleotides and lacks a phosphate backbone"],
+   answer:0, e:"Primers are RNA: they contain ribonucleotides and use uracil in place of thymine, and are later swapped for DNA."},
+
+  {q:"In prokaryotes, which DNA polymerase is chiefly responsible for synthesizing the bulk of new DNA?",
+   options:["DNA polymerase III","DNA polymerase I","DNA polymerase II","DNA polymerase IV"],
+   answer:0, e:"Pol III is the main replicative enzyme in bacteria; Pol I chiefly removes and replaces RNA primers."},
+
+  {q:"In prokaryotes, which enzyme removes the RNA primers and fills the gaps with DNA?",
+   options:["DNA polymerase I","DNA polymerase III","DNA primase","DNA ligase"],
+   answer:0, e:"Pol I excises RNA primers and replaces them with DNA; Pol III handles the bulk of elongation."},
+
+  {q:"A patient's cells show a mutation impairing DNA polymerase γ. Which process is most directly affected?",
+   options:["Replication of mitochondrial DNA","Removal of RNA primers on the lagging strand","Unwinding of the nuclear double helix","Joining of Okazaki fragments"],
+   answer:0, e:"In eukaryotes, polymerase γ is the enzyme located in and responsible for replicating mitochondrial DNA."},
+
+  {q:"Why is the leading strand synthesized continuously while the lagging strand is not?",
+   options:["Only the leading strand template runs 3'→5' toward the fork, allowing uninterrupted 5'→3' synthesis","The leading strand template is AT-rich and unwinds faster","The lagging strand is copied by a slower polymerase that pauses often","The leading strand does not require a primer"],
+   answer:0, e:"Because synthesis is strictly 5'→3', only the strand whose template is oriented toward the moving fork can be made continuously; the other must be made in fragments."},
+
+  {q:"What are Okazaki fragments?",
+   options:["Short DNA segments synthesized discontinuously on the lagging strand","Short RNA primers that mark each origin of replication","Fragments of the leading strand released during proofreading","Sections of parental DNA excised by topoisomerase"],
+   answer:0, e:"Okazaki fragments are the short stretches of DNA made on the lagging strand, each begun from its own primer."},
+
+  {q:"Which enzyme joins adjacent Okazaki fragments, and by forming what type of bond?",
+   options:["DNA ligase, forming phosphodiester bonds","DNA polymerase I, forming hydrogen bonds","Primase, forming glycosidic bonds","Helicase, forming phosphodiester bonds"],
+   answer:0, e:"Ligase seals the nick between fragments by creating a phosphodiester bond in the sugar-phosphate backbone."},
+
+  {q:"In eukaryotes, which polymerase removes primers and fills gaps on the lagging strand?",
+   options:["DNA polymerase δ (delta)","DNA polymerase I","DNA polymerase γ (gamma)","DNA polymerase III"],
+   answer:0, e:"In eukaryotes, polymerase δ carries out primer replacement on the lagging strand (the role Pol I plays in prokaryotes)."},
+
+  {q:"What problem does topoisomerase relieve during replication?",
+   options:["Supercoiling tension that builds up ahead of the unwinding fork","Re-annealing of separated single strands","Accumulation of unremoved RNA primers","Mismatched bases inserted by polymerase"],
+   answer:0, e:"Unwinding introduces torsional strain (supercoiling); topoisomerase cuts and reseals DNA to release that tension."},
+
+  {q:"How does topoisomerase II differ from topoisomerase I?",
+   options:["Topoisomerase II cuts both strands, whereas topoisomerase I cuts only one","Topoisomerase II cuts one strand, whereas topoisomerase I cuts both","Topoisomerase II requires no ATP, unlike topoisomerase I","Topoisomerase II works only in prokaryotes, unlike topoisomerase I"],
+   answer:0, e:"Topo I nicks and reseals a single strand; Topo II transiently breaks both strands of the duplex."},
+
+  {q:"Quinolone antibiotics kill bacteria by targeting which molecular machinery?",
+   options:["Prokaryotic topoisomerases","Bacterial DNA helicase","Bacterial DNA ligase","Prokaryotic DNA primase"],
+   answer:0, e:"Quinolones inhibit bacterial topoisomerases (e.g., DNA gyrase), blocking replication in prokaryotes selectively."},
+
+  {q:"Etoposide and anthracyclines are chemotherapy agents that act by inhibiting which enzyme?",
+   options:["Eukaryotic topoisomerases","Eukaryotic helicase","Telomerase","DNA ligase"],
+   answer:0, e:"These agents target eukaryotic topoisomerases, disrupting DNA replication in dividing tumor cells."},
+
+  {q:"What does it mean that DNA replication is 'semi-conservative'?",
+   options:["Each daughter duplex contains one parental strand and one newly made strand","Each daughter duplex contains two entirely new strands","Half the genome is replicated per cell division","One daughter cell keeps both original strands"],
+   answer:0, e:"Semi-conservative replication produces two duplexes, each with one old (template) strand and one new strand."},
+
+  {q:"DNA polymerase's proofreading function corrects a misincorporated nucleotide using which activity?",
+   options:["3'→5' exonuclease activity","5'→3' exonuclease activity","5'→3' endonuclease activity","3'→5' polymerase activity"],
+   answer:0, e:"When a wrong base is added, polymerase reverses and uses 3'→5' exonuclease activity to excise it before continuing."},
+
+  {q:"During proofreading, in which direction does DNA polymerase move to remove an incorrectly added nucleotide?",
+   options:["Backward, in the 3' to 5' direction","Forward, in the 5' to 3' direction","Backward, in the 5' to 3' direction","It does not move; it degrades the entire strand"],
+   answer:0, e:"Synthesis is 5'→3', but to excise an error the enzyme backtracks in the 3'→5' direction using its exonuclease."},
+
+  {q:"What is the net effect of DNA polymerase's proofreading capacity?",
+   options:["It significantly reduces the overall error rate of replication","It increases the speed of fork progression","It removes RNA primers more efficiently","It relieves supercoiling ahead of the fork"],
+   answer:0, e:"Proofreading catches and fixes most misincorporations, dramatically lowering the mutation rate per replication."},
+
+  {q:"What are telomeres?",
+   options:["Repetitive nucleotide sequences at the ends of chromosomes","Origins of replication near the centromere","RNA primers marking the lagging strand","Sites where topoisomerase relieves tension"],
+   answer:0, e:"Telomeres are repetitive protective caps (rich in T-T-A-G-G-G repeats) at chromosome ends."},
+
+  {q:"Why do the ends of linear eukaryotic chromosomes pose a replication problem?",
+   options:["There is no room to place a primer for the final lagging-strand segment","The leading strand cannot be primed at chromosome ends","Topoisomerase cannot access the terminal repeats","Helicase stalls permanently at the telomere"],
+   answer:0, e:"On the lagging strand, the terminal-most primer cannot be replaced, so a bit of end sequence is lost each round without telomerase."},
+
+  {q:"Telomerase is best described as which kind of enzyme?",
+   options:["An RNA-dependent DNA polymerase (similar to reverse transcriptase)","A DNA-dependent RNA polymerase","A DNA-dependent DNA polymerase lacking proofreading","An RNA-dependent RNA polymerase"],
+   answer:0, e:"Telomerase carries an RNA template and synthesizes DNA from it — RNA-dependent DNA polymerase activity, like reverse transcriptase."},
+
+  {q:"How does telomerase extend the chromosome end?",
+   options:["It adds telomere repeats to the 3' end using its own RNA template","It removes the 3' overhang and reseals the strand","It adds repeats to the 5' end using a DNA template","It splices telomere sequences from another chromosome"],
+   answer:0, e:"Telomerase uses its built-in RNA template to add telomeric repeats to the 3' end, extending it so the lagging strand can be completed."},
+
+  {q:"Extending the 3' end with telomerase ultimately serves what purpose?",
+   options:["It lets DNA polymerase finish the lagging strand without losing genes","It speeds up the leading-strand synthesis","It substitutes for proofreading at chromosome ends","It relieves supercoiling at the telomere"],
+   answer:0, e:"By lengthening the 3' end, telomerase gives room to complete the lagging strand, preventing progressive loss of terminal genes."},
+
+  {q:"In which cell types is telomerase activity normally high, allowing repeated division?",
+   options:["Hematopoietic stem cells, epidermis, and intestinal mucosa","Mature cardiac myocytes and neurons","Skeletal muscle fibers and adipocytes","Terminally differentiated hepatocytes only"],
+   answer:0, e:"Telomerase is active in rapidly renewing tissues — stem cells, skin, gut lining — where indefinite controlled division is required."},
+
+  {q:"Reactivation of telomerase in somatic cells is implicated in cancer because it does what?",
+   options:["Grants cells replicative immortality by preventing telomere shortening","Increases the fidelity of DNA polymerase","Blocks topoisomerase, halting the cell cycle","Prevents formation of Okazaki fragments"],
+   answer:0, e:"By maintaining telomere length indefinitely, telomerase lets malignant cells bypass the normal replicative limit — effectively becoming immortal."},
+
+  {q:"Which base pairing is correct for DNA?",
+   options:["Adenine with thymine; guanine with cytosine","Adenine with uracil; guanine with cytosine","Adenine with cytosine; guanine with thymine","Adenine with guanine; cytosine with thymine"],
+   answer:0, e:"In DNA, A pairs with T and G pairs with C. (A–U pairing is specific to RNA.)"},
+
+  {q:"The two strands of a DNA double helix are described as antiparallel. What does this mean?",
+   options:["One strand runs 5'→3' while its complement runs 3'→5'","Both strands run 5'→3' in the same direction","The strands are joined end-to-end at their 3' ends","The strands twist in opposite rotational directions"],
+   answer:0, e:"Antiparallel means the strands run in opposite 5'→3' orientations — a key constraint that dictates directional synthesis."},
+
+  {q:"Nucleotides are added to DNA in which chemical form?",
+   options:["As triphosphates, with two phosphates cleaved to drive the reaction","As monophosphates, using ATP separately for energy","As diphosphates, with one phosphate retained in the backbone","As free bases, phosphorylated after incorporation"],
+   answer:0, e:"Deoxynucleoside triphosphates are the substrates; cleavage of the pyrophosphate (two phosphates) provides the energy for bond formation."},
+
+  {q:"Unlike DNA polymerase, RNA polymerase (which makes the primer via primase) has what distinctive feature regarding initiation?",
+   options:["It does not require a pre-existing primer to begin synthesis","It requires two primers, one per strand","It can only extend an existing DNA 3' end","It synthesizes exclusively in the 3'→5' direction"],
+   answer:0, e:"RNA polymerase/primase can initiate a new chain de novo, which is exactly why it can lay down the primer DNA polymerase then extends."},
+
+  {q:"A defect that prevented DNA ligase from functioning would most directly cause which problem?",
+   options:["Okazaki fragments on the lagging strand would remain unjoined","The double helix could not be unwound","No primers could be synthesized","The leading strand could not be started"],
+   answer:0, e:"Ligase seals the nicks between Okazaki fragments; without it, the lagging strand stays fragmented."},
+
+  {q:"Where does replication begin along a DNA molecule?",
+   options:["At specific origin sequences that attract initiator proteins","At random points scattered evenly across the genome","Only at the telomeres at each chromosome end","At the site where the previous round of replication ended"],
+   answer:0, e:"Replication starts at defined origins — specific sequences that recruit initiator proteins and are easy to unwind."},
+
+  {q:"Considering both strands at a single replication fork, what is happening simultaneously?",
+   options:["One strand is made continuously and the other in discontinuous fragments","Both strands are made continuously in the same direction","Both strands are made as Okazaki fragments","Replication pauses on one strand until the other finishes"],
+   answer:0, e:"At each fork the leading strand is synthesized continuously while the lagging strand is built as separate Okazaki fragments."}
+];
+</script>
+
+<script>
+/* ===== Quiz engine ===== */
+(function(){
+  const bank = QUESTIONS.map(q=>({...q}));
+  const quizEl = document.getElementById('quiz');
+  const totalEl = document.getElementById('total');
+  const answeredEl = document.getElementById('answered');
+  const scorepillEl = document.getElementById('scorepill');
+  const barfill = document.getElementById('barfill');
+  const submitBtn = document.getElementById('submitBtn');
+  const submitRow = document.getElementById('submitRow');
+  const hint = document.getElementById('hint');
+  const resultEl = document.getElementById('result');
+  const LETTERS = ['A','B','C','D','E','F'];
+  const PASS = 70;
+
+  let state = [];
+
+  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+  function build(){
+    quizEl.innerHTML='';
+    state = bank.map(()=>({answered:false,correct:false}));
+    totalEl.textContent = bank.length;
+
+    bank.forEach((item,qi)=>{
+      // shuffle options, track correct index
+      const order = shuffle(item.options.map((t,idx)=>({t,idx})));
+      const correctPos = order.findIndex(o=>o.idx===item.answer);
+
+      const card = document.createElement('div');
+      card.className='q';
+      card.id='q'+qi;
+
+      const head = document.createElement('div');
+      head.className='q-head';
+      head.innerHTML = `<span class="q-num">Q${String(qi+1).padStart(2,'0')}</span><span class="q-text"></span>`;
+      head.querySelector('.q-text').textContent = item.q;
+      card.appendChild(head);
+
+      const opts = document.createElement('div');
+      opts.className='opts';
+      order.forEach((o,pos)=>{
+        const b = document.createElement('button');
+        b.className='opt';
+        b.innerHTML = `<span class="tag">${LETTERS[pos]}</span><span class="txt"></span><span class="mark"></span>`;
+        b.querySelector('.txt').textContent = o.t;
+        b.addEventListener('click',()=>choose(qi,pos,correctPos,opts,exp));
+        opts.appendChild(b);
+      });
+      card.appendChild(opts);
+
+      const exp = document.createElement('div');
+      exp.className='explain';
+      exp.innerHTML = `<b>Why:</b> ${item.e}`;
+      card.appendChild(exp);
+
+      quizEl.appendChild(card);
+    });
+    update();
+  }
+
+  function choose(qi,pos,correctPos,optsEl,expEl){
+    if(state[qi].answered) return;
+    state[qi].answered=true;
+    state[qi].correct = (pos===correctPos);
+    const buttons=[...optsEl.children];
+    buttons.forEach((b,i)=>{
+      b.disabled=true;
+      if(i===correctPos){b.classList.add('correct');b.querySelector('.mark').textContent='✓';}
+      if(i===pos && pos!==correctPos){b.classList.add('wrong');b.querySelector('.mark').textContent='✗';}
+    });
+    expEl.classList.add('show');
+    update();
+  }
+
+  function update(){
+    const answered = state.filter(s=>s.answered).length;
+    const correct = state.filter(s=>s.correct).length;
+    answeredEl.textContent = answered;
+    scorepillEl.textContent = correct+' correct';
+    barfill.style.width = (answered/bank.length*100)+'%';
+    const done = answered===bank.length;
+    submitBtn.disabled = !done;
+    hint.textContent = done ? 'All answered — lock in your score' : (bank.length-answered)+' left';
+  }
+
+  submitBtn.addEventListener('click',()=>{
+    const correct = state.filter(s=>s.correct).length;
+    const pct = Math.round(correct/bank.length*100);
+    const pass = pct>=PASS;
+    resultEl.className='result show '+(pass?'pass':'fail');
+    document.getElementById('verdict').textContent = pass?'Pass':'Keep reviewing';
+    document.getElementById('bigscore').textContent = pct+'%';
+    document.getElementById('resultDetail').textContent =
+      `${correct} of ${bank.length} correct · passing mark is ${PASS}%`;
+    submitRow.style.display='none';
+    resultEl.scrollIntoView({behavior:'smooth',block:'center'});
+  });
+
+  window.retry=function(){
+    resultEl.className='result';
+    submitRow.style.display='';
+    build();
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+
+  build();
+})();
+</script>
+</body>
+</html>

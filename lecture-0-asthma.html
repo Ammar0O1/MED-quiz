@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Asthma — Quiz</title>
+<style>
+  :root{
+    --ink:#0a0e14; --ink-2:#0f1620; --panel:#121b28; --panel-2:#16212f;
+    --line:#1f2d3f; --line-2:#293a50;
+    --text:#e6edf5; --muted:#8598ad; --faint:#5a6b82;
+    --accent:#f87171; --accent-2:#ef4444; --accent-soft:rgba(248,113,113,0.12);
+    --good:#34d399; --good-soft:rgba(52,211,153,0.14); --good-line:rgba(52,211,153,0.5);
+    --bad:#f87171; --bad-soft:rgba(248,113,113,0.13); --bad-line:rgba(248,113,113,0.5);
+    --gold:#fbbf24;
+    --mono:'SF Mono',ui-monospace,'Cascadia Code','JetBrains Mono',Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;background:var(--ink);color:var(--text);font-family:var(--sans);
+    line-height:1.55;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background-image:radial-gradient(1200px 600px at 80% -10%,rgba(56,189,248,0.06),transparent 60%),radial-gradient(900px 500px at -10% 110%,rgba(56,189,248,0.05),transparent 60%);
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:22px 18px 96px;}
+
+  /* top bar */
+  .top{display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap;}
+  .back{
+    display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--muted);
+    font-family:var(--mono);font-size:13px;padding:9px 14px;border:1px solid var(--line);
+    border-radius:11px;background:var(--panel);transition:.15s;
+  }
+  .back:active{background:var(--panel-2);}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--accent);
+    text-transform:uppercase;border:1px solid var(--line-2);padding:6px 12px;border-radius:20px;background:var(--accent-soft);}
+
+  h1{font-family:var(--mono);font-size:clamp(26px,6vw,38px);font-weight:700;letter-spacing:-.01em;
+    margin:6px 0 6px;line-height:1.1;}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 22px;max-width:60ch;}
+
+  /* progress */
+  .progress-wrap{position:sticky;top:8px;z-index:20;margin-bottom:26px;}
+  .progress-card{background:rgba(15,22,32,0.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid var(--line);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:14px;}
+  .progress-meta{font-family:var(--mono);font-size:12.5px;color:var(--muted);white-space:nowrap;}
+  .progress-meta b{color:var(--text);}
+  .bar{flex:1;height:7px;background:var(--ink-2);border-radius:99px;overflow:hidden;border:1px solid var(--line);}
+  .bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent-2),var(--accent));
+    border-radius:99px;transition:width .35s cubic-bezier(.4,0,.2,1);}
+  .score-pill{font-family:var(--mono);font-size:12.5px;color:var(--good);white-space:nowrap;}
+
+  /* question card */
+  .q{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 18px;margin-bottom:16px;
+    scroll-margin-top:90px;}
+  .q-head{display:flex;gap:12px;align-items:baseline;margin-bottom:14px;}
+  .q-num{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700;flex:none;
+    border:1px solid var(--line-2);background:var(--accent-soft);border-radius:8px;padding:3px 9px;min-width:44px;text-align:center;}
+  .q-text{font-size:16.5px;font-weight:600;line-height:1.5;letter-spacing:-.005em;}
+  .opts{display:flex;flex-direction:column;gap:9px;margin-top:4px;}
+  .opt{
+    display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;
+    background:var(--panel-2);border:1px solid var(--line);border-radius:12px;
+    padding:14px 15px;color:var(--text);font-size:15.5px;font-family:inherit;line-height:1.45;
+    cursor:pointer;transition:border-color .15s,background .15s,transform .06s;
+  }
+  .opt:active{transform:scale(.994);}
+  @media(hover:hover){.opt:not(:disabled):hover{border-color:var(--accent-2);background:var(--panel);}}
+  .opt .tag{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--muted);flex:none;
+    width:24px;height:24px;border-radius:7px;border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .opt .txt{flex:1;}
+  .opt:disabled{cursor:default;}
+  .opt.correct{background:var(--good-soft);border-color:var(--good-line);}
+  .opt.correct .tag{color:var(--good);border-color:var(--good-line);background:var(--good-soft);}
+  .opt.wrong{background:var(--bad-soft);border-color:var(--bad-line);}
+  .opt.wrong .tag{color:var(--bad);border-color:var(--bad-line);background:var(--bad-soft);}
+  .opt .mark{margin-left:auto;font-family:var(--mono);font-size:13px;font-weight:700;flex:none;align-self:center;}
+  .opt.correct .mark{color:var(--good);}
+  .opt.wrong .mark{color:var(--bad);}
+
+  .explain{margin-top:13px;border-left:3px solid var(--accent-2);background:var(--ink-2);
+    border-radius:0 10px 10px 0;padding:12px 15px;font-size:14.5px;color:var(--muted);display:none;}
+  .explain.show{display:block;animation:fade .25s ease;}
+  .explain b{color:var(--text);font-weight:600;}
+  @keyframes fade{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+
+  /* result */
+  .result{background:linear-gradient(160deg,var(--panel),var(--ink-2));border:1px solid var(--line-2);
+    border-radius:18px;padding:30px 22px;text-align:center;margin-top:8px;display:none;}
+  .result.show{display:block;animation:fade .3s ease;}
+  .result .verdict{font-family:var(--mono);font-size:14px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px;}
+  .result.pass .verdict{color:var(--good);}
+  .result.fail .verdict{color:var(--gold);}
+  .result .big{font-family:var(--mono);font-size:56px;font-weight:700;line-height:1;margin:6px 0;}
+  .result .detail{color:var(--muted);font-size:15px;margin-bottom:20px;}
+  .result .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .btn{font-family:var(--mono);font-size:14px;padding:12px 20px;border-radius:11px;border:1px solid var(--line-2);
+    background:var(--panel-2);color:var(--text);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:.15s;}
+  .btn:active{transform:scale(.97);}
+  .btn.primary{background:var(--accent-2);border-color:var(--accent);color:#04121c;font-weight:700;}
+
+  .submit-row{margin-top:8px;text-align:center;}
+  .submit-btn{font-family:var(--mono);font-size:15px;font-weight:700;padding:15px 30px;border-radius:13px;
+    border:1px solid var(--accent);background:var(--accent-2);color:#04121c;cursor:pointer;transition:.15s;width:100%;max-width:340px;}
+  .submit-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .submit-btn:not(:disabled):active{transform:scale(.98);}
+  .hint{font-family:var(--mono);font-size:12.5px;color:var(--faint);margin-top:12px;}
+
+  @media(min-width:768px){
+    .wrap{padding:34px 26px 110px;}
+    .q{padding:24px 24px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="index.html">&larr; All lectures</a>
+    <span class="eyebrow">Respiratory Module · Nerdosis</span>
+  </div>
+  <h1>Asthma</h1>
+  <p class="sub">Definition, epidemiology, triggers, pathophysiology, clinical features, diagnosis, severity, and treatment of chronic and acute asthma. Tap an answer to lock it in and see instant feedback.</p>
+
+  <div class="progress-wrap">
+    <div class="progress-card">
+      <span class="progress-meta"><b id="answered">0</b>/<span id="total">0</span> answered</span>
+      <div class="bar"><i id="barfill"></i></div>
+      <span class="score-pill" id="scorepill">0 correct</span>
+    </div>
+  </div>
+
+  <div id="quiz"></div>
+
+  <div class="submit-row" id="submitRow">
+    <button class="submit-btn" id="submitBtn" disabled>Finish &amp; see score</button>
+    <div class="hint" id="hint">Answer all questions to finish</div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="verdict" id="verdict"></div>
+    <div class="big" id="bigscore"></div>
+    <div class="detail" id="resultDetail"></div>
+    <div class="actions">
+      <button class="btn primary" onclick="retry()">Try again</button>
+      <a class="btn" href="index.html">Back to lectures</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== Question bank =====
+   answer = index of correct option. Options are shuffled at render so position carries no signal. */
+const QUESTIONS = [
+  {
+    "q": "Which combination of features best defines asthma as a clinical syndrome?",
+    "options": [
+      "Reversible airflow limitation with airway hyperresponsiveness and inflammation",
+      "Fixed, irreversible airflow limitation with minimal inflammation",
+      "Isolated bronchial smooth muscle hypertrophy without inflammation",
+      "Productive cough with permanent airway destruction"
+    ],
+    "answer": 0,
+    "e": "Asthma is defined by reversible airflow limitation, hyperresponsiveness, and airway inflammation, though some airway changes over time can become irreversible."
+  },
+  {
+    "q": "How does the typical cough in asthma differ from the productive cough of COPD, as emphasized in the lecture?",
+    "options": [
+      "Asthma cough is characteristically nonproductive, whereas COPD cough is productive",
+      "Asthma cough is always productive with copious purulent sputum",
+      "Both are always productive and indistinguishable by history",
+      "Neither condition typically presents with cough"
+    ],
+    "answer": 0,
+    "e": "The lecture contrasts asthma's nonproductive cough with the productive cough typically seen in COPD."
+  },
+  {
+    "q": "What percentage of the US population is affected by asthma?",
+    "options": [
+      "5–10%",
+      "1–2%",
+      "20–25%",
+      "40–50%"
+    ],
+    "answer": 0,
+    "e": "Asthma affects roughly 5–10% of the US population, and its prevalence has been increasing over the past 20 years for unclear reasons."
+  },
+  {
+    "q": "Regarding the sex distribution of asthma, which statement is correct?",
+    "options": [
+      "Males predominate before age 18, while females predominate after age 18",
+      "Females predominate at all ages",
+      "Males predominate at all ages",
+      "Sex distribution is identical regardless of age of onset"
+    ],
+    "answer": 0,
+    "e": "Asthma is more common in males under 18, but the pattern reverses so that females predominate after age 18."
+  },
+  {
+    "q": "What is the typical age-of-onset pattern that distinguishes allergic from nonallergic asthma?",
+    "options": [
+      "Allergic asthma typically begins in childhood; nonallergic asthma typically begins after age 40",
+      "Allergic asthma typically begins after age 40; nonallergic asthma begins in childhood",
+      "Both types begin almost exclusively in childhood",
+      "Both types begin almost exclusively after age 60"
+    ],
+    "answer": 0,
+    "e": "Allergic (extrinsic) asthma classically starts in childhood, whereas nonallergic (intrinsic) asthma typically has an onset after age 40."
+  },
+  {
+    "q": "The 'Atopic March' describes which sequence of disease progression?",
+    "options": [
+      "Atopic dermatitis progressing to allergic rhinitis and then to asthma",
+      "Asthma progressing to allergic rhinitis and then to eczema",
+      "Allergic rhinitis progressing directly to COPD",
+      "Chronic sinusitis progressing to atopic dermatitis"
+    ],
+    "answer": 0,
+    "e": "The Atopic March describes the classic progression from skin inflammation (atopic dermatitis/eczema) to allergic rhinitis and then to asthma."
+  },
+  {
+    "q": "Which three conditions together make up the Atopic Triad?",
+    "options": [
+      "Atopic dermatitis, allergic rhinitis, and asthma",
+      "Atopic dermatitis, aspirin sensitivity, and nasal polyps",
+      "Chronic sinusitis, GERD, and asthma",
+      "Allergic rhinitis, COPD, and eczema"
+    ],
+    "answer": 0,
+    "e": "The Atopic Triad consists of atopic dermatitis (eczema), allergic rhinitis (hay fever), and asthma."
+  },
+  {
+    "q": "Samter's Triad (aspirin-exacerbated respiratory disease) classically consists of asthma plus which two other features?",
+    "options": [
+      "Nasal polyps and aspirin/NSAID sensitivity",
+      "Eczema and allergic rhinitis",
+      "GERD and chronic sinusitis",
+      "Cold air sensitivity and exercise intolerance"
+    ],
+    "answer": 0,
+    "e": "Samter's Triad links asthma with nasal polyps and sensitivity to aspirin/NSAIDs, distinct from the Atopic Triad."
+  },
+  {
+    "q": "Which of the following is characteristic of allergic (extrinsic) asthma rather than nonallergic asthma?",
+    "options": [
+      "Triggered by pollen, dust mites, and animal dander via an atopic mechanism",
+      "Triggered mainly by viral upper respiratory infections",
+      "Typically has its onset after age 40",
+      "Responds poorly to inhaled corticosteroids"
+    ],
+    "answer": 0,
+    "e": "Allergic asthma is driven by environmental allergens (pollen, dust mites, mold, pet dander) in atopic individuals and generally responds well to ICS."
+  },
+  {
+    "q": "Which trigger is specifically associated with nonallergic (intrinsic) asthma rather than the allergic form?",
+    "options": [
+      "Viral respiratory tract infections and cold air",
+      "Pollen exposure during specific seasons",
+      "Domestic animal dander",
+      "Occupational flour dust exposure"
+    ],
+    "answer": 0,
+    "e": "Nonallergic asthma is commonly triggered by viral URIs, cold air, exercise, GERD, sinusitis, and certain drugs — not by an IgE-mediated allergic mechanism."
+  },
+  {
+    "q": "Which class of drugs is a well-recognized trigger of asthma exacerbations, alongside aspirin and NSAIDs?",
+    "options": [
+      "Beta blockers",
+      "ACE inhibitors",
+      "Calcium channel blockers",
+      "Loop diuretics"
+    ],
+    "answer": 0,
+    "e": "Beta blockers, aspirin, and NSAIDs are all listed as recognized asthma triggers, in addition to stress, GERD, and sinusitis."
+  },
+  {
+    "q": "Which three cell types are most centrally involved in the chronic inflammation of asthma?",
+    "options": [
+      "Eosinophils, mast cells, and Th2 cells",
+      "Neutrophils, macrophages, and NK cells",
+      "Osteoclasts, fibroblasts, and platelets",
+      "Hepatocytes, Kupffer cells, and monocytes"
+    ],
+    "answer": 0,
+    "e": "Chronic asthmatic inflammation centrally involves eosinophils, mast cells, and T-helper type 2 (Th2) lymphocytes."
+  },
+  {
+    "q": "In the immune cascade of asthma, dendritic cells present antigen and activate which type of T-helper cell?",
+    "options": [
+      "Th2 cells, which release IL-4 and IL-5",
+      "Th1 cells, which release interferon-gamma",
+      "Th17 cells, which release IL-17 exclusively",
+      "Cytotoxic CD8 T-cells"
+    ],
+    "answer": 0,
+    "e": "Dendritic cells activate Th2 cells, which release IL-4 and IL-5 — driving IgE production by plasma cells and eosinophil recruitment."
+  },
+  {
+    "q": "In the asthma inflammatory cascade, IL-4 primarily stimulates which cell type to produce IgE?",
+    "options": [
+      "Plasma cells",
+      "Eosinophils",
+      "Mast cells directly without IgE",
+      "Dendritic cells"
+    ],
+    "answer": 0,
+    "e": "IL-4 (from Th2 cells) drives plasma cells to class-switch and produce IgE, which then binds mast cells and sensitizes them for future allergen exposure."
+  },
+  {
+    "q": "Once IgE binds mast cells in the asthma cascade, subsequent allergen exposure triggers release of which mediators that cause airway obstruction?",
+    "options": [
+      "Histamines and leukotrienes",
+      "Insulin and glucagon",
+      "Acetylcholine and dopamine",
+      "Thromboxane and erythropoietin"
+    ],
+    "answer": 0,
+    "e": "Mast cell degranulation releases histamines and leukotrienes, which act on the airway to produce obstruction (bronchoconstriction, edema, mucus)."
+  },
+  {
+    "q": "Which three structural mechanisms together produce airway obstruction in an asthma attack?",
+    "options": [
+      "Increased wall edema, increased mucus production, and increased bronchospasm",
+      "Decreased wall thickness, decreased mucus, and bronchodilation",
+      "Airway fibrosis only, with no acute component",
+      "Loss of cartilage support in the trachea"
+    ],
+    "answer": 0,
+    "e": "The diagram shows airway obstruction resulting from the combination of increased wall edema, increased mucus, and increased bronchospasm."
+  },
+  {
+    "q": "During an asthma attack, why does air trapping and hyperinflation occur?",
+    "options": [
+      "Airway narrowing makes expiration worse than inspiration, trapping air distally",
+      "Inspiration becomes selectively blocked while expiration remains normal",
+      "Air trapping only occurs with pneumothorax, not plain bronchospasm",
+      "The diaphragm becomes paralyzed during attacks"
+    ],
+    "answer": 0,
+    "e": "Narrowed airways collapse preferentially during expiration, so expiration is worse than inspiration — trapping air and progressively hyperinflating the lungs."
+  },
+  {
+    "q": "Airway hyperresponsiveness in asthma is best described as:",
+    "options": [
+      "An exaggerated bronchoconstrictive response to normally harmless stimuli",
+      "A complete absence of any airway response to stimuli",
+      "A response limited only to inhaled allergens, never to cold air or exercise",
+      "A fixed, unchanging airway caliber regardless of stimulus"
+    ],
+    "answer": 0,
+    "e": "In asthma, even innocuous triggers (pollen, cold air, exercise) provoke exaggerated bronchoconstriction, producing wheeze, cough, and dyspnea."
+  },
+  {
+    "q": "Under normal physiology, which receptor mediates sympathetic relaxation and dilation of airway smooth muscle?",
+    "options": [
+      "Beta-2 adrenergic receptors",
+      "Alpha-1 adrenergic receptors",
+      "Muscarinic M3 receptors",
+      "Histamine H1 receptors"
+    ],
+    "answer": 0,
+    "e": "Sympathetic stimulation via beta-2 receptors normally relaxes airway smooth muscle; in asthma, inflammatory mediators override this and cause bronchoconstriction."
+  },
+  {
+    "q": "Persistent inflammation in asthma can lead to airway remodeling. This structural change includes:",
+    "options": [
+      "Airway wall thickening and smooth muscle hypertrophy that can become irreversible",
+      "Complete regeneration of normal, thinner airway walls",
+      "Loss of all smooth muscle from the bronchial wall",
+      "Replacement of bronchial epithelium with cartilage"
+    ],
+    "answer": 0,
+    "e": "Chronic inflammation causes structural remodeling — fibrosis and smooth muscle hypertrophy — contributing to chronic, sometimes irreversible symptoms."
+  },
+  {
+    "q": "Which sign on chest examination is described as an ominous finding in severe asthma exacerbation, reflecting critically limited airflow?",
+    "options": [
+      "A silent chest, due to airflow too limited to generate a wheeze",
+      "Loud biphasic wheeze throughout the chest",
+      "A pleural friction rub",
+      "Bronchial breath sounds over the lower lobes"
+    ],
+    "answer": 0,
+    "e": "A 'silent chest' means airflow is so severely reduced that no wheeze is generated — an ominous sign of impending respiratory failure, not improvement."
+  },
+  {
+    "q": "Why is nocturnal cough a classic feature of asthma?",
+    "options": [
+      "Vagal tone increases at night, contributing to bronchoconstriction",
+      "Sympathetic tone is at its peak overnight",
+      "Cortisol levels peak at midnight, worsening inflammation",
+      "Lying flat abolishes airway resistance"
+    ],
+    "answer": 0,
+    "e": "Increased vagal tone at night is cited as a driver of the characteristically nocturnal or early-morning worsening of asthma cough."
+  },
+  {
+    "q": "Pulsus paradoxus, seen in severe asthma exacerbations, refers to:",
+    "options": [
+      "An exaggerated fall in systolic blood pressure during inspiration",
+      "A rise in blood pressure during inspiration",
+      "An irregular, chaotic heart rhythm",
+      "A drop in oxygen saturation only during expiration"
+    ],
+    "answer": 0,
+    "e": "Pulsus paradoxus is an exaggerated inspiratory drop in systolic blood pressure, related to the large intrathoracic pressure swings in severe airflow obstruction."
+  },
+  {
+    "q": "According to the respiratory-failure pathway shown for severe asthma, progressive hyperinflation and hypoventilation ultimately lead to which type of respiratory failure?",
+    "options": [
+      "Type II respiratory failure, with rising CO2 and falling O2",
+      "Type I respiratory failure, with normal CO2 and low O2 only",
+      "Metabolic alkalosis without any gas exchange abnormality",
+      "Isolated hypercapnia with normal oxygenation and normal pH"
+    ],
+    "answer": 0,
+    "e": "Severe asthma can progress through hyperinflation and hypoventilation to Type II respiratory failure — elevated CO2, low O2, and worsening respiratory acidosis."
+  },
+  {
+    "q": "Hyperinflation in severe asthma can predispose to which acute complication shown alongside respiratory failure?",
+    "options": [
+      "Secondary pneumothorax",
+      "Pulmonary embolism",
+      "Aortic dissection",
+      "Cardiac tamponade"
+    ],
+    "answer": 0,
+    "e": "Severe hyperinflation can lead to secondary pneumothorax, a recognized acute complication in severe asthma."
+  },
+  {
+    "q": "Which asthma variant is characterized by cough as the dominant or sole symptom, often causing diagnostic delay?",
+    "options": [
+      "Cough variant asthma",
+      "Occupational asthma",
+      "Aspirin-induced asthma",
+      "Asthma-COPD overlap"
+    ],
+    "answer": 0,
+    "e": "Cough variant asthma presents predominantly with cough, and the absence of wheeze or breathlessness can delay diagnosis."
+  },
+  {
+    "q": "The bronchoconstriction seen in exercise-induced asthma is thought to result primarily from:",
+    "options": [
+      "Water and heat loss from the airway mucosa during hyperventilation, triggering mediator release",
+      "Direct mechanical trauma to the bronchi during exertion",
+      "A pure vagal reflex unrelated to airway surface changes",
+      "Elevated core body temperature alone"
+    ],
+    "answer": 0,
+    "e": "Hyperventilation during exercise causes water (and heat) loss from the airway lining fluid, which triggers release of bronchoconstrictive mediators."
+  },
+  {
+    "q": "In aspirin-induced asthma, inhibition of cyclo-oxygenase shunts arachidonic acid metabolism toward which pathway, producing bronchoconstrictive mediators?",
+    "options": [
+      "The lipoxygenase pathway, producing cysteinyl leukotrienes",
+      "The prostaglandin pathway, producing prostacyclin",
+      "The thromboxane pathway exclusively",
+      "The complement activation pathway"
+    ],
+    "answer": 0,
+    "e": "Blocking COX shunts arachidonic acid through lipoxygenase, increasing production of asthmogenic cysteinyl leukotrienes that provoke bronchospasm."
+  },
+  {
+    "q": "Occupational asthma accounts for roughly what proportion of adult-onset asthma cases, according to the lecture?",
+    "options": [
+      "About 10%",
+      "About 1%",
+      "About 50%",
+      "About 90%"
+    ],
+    "answer": 0,
+    "e": "Occupational asthma, caused by specific workplace sensitizers (e.g., baker's asthma from flour dust), accounts for roughly 10% of adult-onset asthma."
+  },
+  {
+    "q": "How should occupational asthma be specifically investigated?",
+    "options": [
+      "Serial peak expiratory flow (PEF) measurements taken both at work and at home",
+      "A single spirometry performed only at the workplace",
+      "Skin-prick testing exclusively, without any spirometry",
+      "Chest CT performed after a work shift"
+    ],
+    "answer": 0,
+    "e": "Serial PEF monitoring comparing values at work versus at home helps confirm a temporal relationship between occupational exposure and airflow limitation."
+  },
+  {
+    "q": "Which spirometric finding supports a diagnosis of asthma when reversibility testing is performed?",
+    "options": [
+      "FEV1 increase of ≥12% and ≥200 mL after bronchodilator",
+      "FEV1 increase of ≥5% and ≥50 mL after bronchodilator",
+      "No change in FEV1 despite bronchodilator use",
+      "A decrease in FEV1 after bronchodilator administration"
+    ],
+    "answer": 0,
+    "e": "A rise in FEV1 of at least 12% and at least 200 mL after a bronchodilator (or after a trial of ICS) demonstrates the reversibility characteristic of asthma."
+  },
+  {
+    "q": "On a methacholine bronchial challenge test, what decrease in FEV1 supports a diagnosis of airway hyperresponsiveness?",
+    "options": [
+      "A fall in FEV1 of ≥20% from baseline",
+      "A fall in FEV1 of ≥5% from baseline",
+      "A rise in FEV1 of ≥12% from baseline",
+      "No change in FEV1 whatsoever"
+    ],
+    "answer": 0,
+    "e": "A ≥20% drop in FEV1 in response to methacholine indicates airway hyperresponsiveness, supporting the diagnosis when baseline spirometry is inconclusive."
+  },
+  {
+    "q": "What degree of diurnal variation in peak expiratory flow (PEF), tracked over two weeks, supports a diagnosis of asthma?",
+    "options": [
+      "More than 20% variation on at least 3 days per week",
+      "Less than 5% variation on any day",
+      "Exactly 10% variation measured once",
+      "Diurnal variation is not used diagnostically in asthma"
+    ],
+    "answer": 0,
+    "e": "Greater than 20% diurnal variation in PEF on ≥3 days per week over 2 weeks, recorded on a diary, supports an asthma diagnosis."
+  },
+  {
+    "q": "In exercise-induced asthma, what decline in FEV1 after 6 minutes of exercise supports the diagnosis?",
+    "options": [
+      "A decrease of ≥15%",
+      "A decrease of ≥50%",
+      "An increase of ≥15%",
+      "No change is expected in true exercise-induced asthma"
+    ],
+    "answer": 0,
+    "e": "A fall in FEV1 of at least 15% following 6 minutes of exercise supports a diagnosis of exercise-induced asthma."
+  },
+  {
+    "q": "On the diagnostic algorithm, what FEV1/FVC ratio threshold suggests an obstructive pattern consistent with asthma?",
+    "options": [
+      "FEV1/FVC less than 70%",
+      "FEV1/FVC less than 30%",
+      "FEV1/FVC greater than 90%",
+      "FEV1/FVC exactly equal to 100%"
+    ],
+    "answer": 0,
+    "e": "An FEV1/FVC ratio below 70% indicates airflow obstruction, prompting further bronchodilator or methacholine testing to confirm asthma."
+  },
+  {
+    "q": "On the diagnostic algorithm, what PEFR value indicates a severe asthmatic exacerbation?",
+    "options": [
+      "PEFR less than 40% predicted",
+      "PEFR less than 90% predicted",
+      "PEFR greater than 80% predicted",
+      "PEFR exactly 100% predicted"
+    ],
+    "answer": 0,
+    "e": "A PEFR under 40% of predicted signals a severe exacerbation on the diagnostic pathway, distinct from the FEV1/FVC ratio used for stable disease."
+  },
+  {
+    "q": "What DLCO pattern is typically seen in asthma, distinguishing it from destructive lung diseases like emphysema?",
+    "options": [
+      "Normal or increased DLCO",
+      "Markedly decreased DLCO",
+      "DLCO is always unmeasurable in asthma",
+      "DLCO drops to zero during any exacerbation"
+    ],
+    "answer": 0,
+    "e": "Asthma typically shows a normal or increased DLCO, since alveolar gas-exchange surface is preserved, unlike the reduced DLCO of emphysema."
+  },
+  {
+    "q": "What acid-base and blood gas pattern is expected during a severe asthma exacerbation?",
+    "options": [
+      "Respiratory acidosis, with decreased pH and increased pCO2",
+      "Respiratory alkalosis, with increased pH and decreased pCO2",
+      "Metabolic acidosis with normal pCO2",
+      "Metabolic alkalosis with decreased pCO2"
+    ],
+    "answer": 0,
+    "e": "Severe asthma exacerbation with hypoventilation produces respiratory acidosis: decreased pH with rising pCO2, reflecting Type II respiratory failure."
+  },
+  {
+    "q": "Fractional exhaled nitric oxide (FeNO) is useful in asthma because it serves as a marker of:",
+    "options": [
+      "Eosinophilic airway inflammation and predicts response to corticosteroids",
+      "Bacterial airway colonization",
+      "Structural airway remodeling only",
+      "Cardiac dysfunction secondary to hypoxia"
+    ],
+    "answer": 0,
+    "e": "FeNO is a surrogate marker for eosinophilic airway inflammation and helps predict which patients will respond well to corticosteroid therapy."
+  },
+  {
+    "q": "On the severity classification table, how does 'Mild Persistent' asthma differ from 'Intermittent' asthma in terms of symptom frequency?",
+    "options": [
+      "Mild Persistent has symptoms more than twice weekly but less than daily, versus fewer than twice weekly for Intermittent",
+      "Mild Persistent has continuous daily symptoms, identical to Severe Persistent",
+      "Intermittent asthma has daily symptoms, unlike Mild Persistent",
+      "There is no difference in symptom frequency between the two categories"
+    ],
+    "answer": 0,
+    "e": "Intermittent asthma has symptoms fewer than twice a week; Mild Persistent has symptoms more than twice weekly but less than once daily."
+  },
+  {
+    "q": "In the severity classification, 'Moderate Persistent' asthma is characterized by which peak flow range?",
+    "options": [
+      "60–80% of predicted",
+      "Normal or ≥80% of predicted",
+      "Less than 60% of predicted",
+      "Exactly 100% of predicted with no variability"
+    ],
+    "answer": 0,
+    "e": "Moderate Persistent asthma corresponds to a peak flow of 60–80% predicted, with daily symptoms and nighttime symptoms more than once weekly."
+  },
+  {
+    "q": "On the FEV1-based severity scale used for treatment stepping, an FEV1 below 60% predicted with daily symptoms throughout the day corresponds to which category?",
+    "options": [
+      "Severe",
+      "Intermittent",
+      "Mild",
+      "Moderate, if SABA use is less than daily"
+    ],
+    "answer": 0,
+    "e": "An FEV1 under 60% with symptoms throughout the day and multiple daily SABA use corresponds to the Severe category, mapped to treatment steps 4–6."
+  },
+  {
+    "q": "Under the updated GINA 2024 guideline referenced in the lecture, what is now recommended as Step 1 therapy instead of as-needed short-acting beta-agonist alone?",
+    "options": [
+      "As-needed ICS/formoterol",
+      "Daily high-dose inhaled corticosteroid alone",
+      "Daily oral corticosteroid",
+      "Long-acting muscarinic antagonist monotherapy"
+    ],
+    "answer": 0,
+    "e": "GINA 2024 replaces simple as-needed SABA with as-needed ICS/formoterol as the preferred Step 1 approach for mild intermittent asthma."
+  },
+  {
+    "q": "Which combination of drugs is the mainstay of Step 2 chronic asthma treatment?",
+    "options": [
+      "Daily low-dose inhaled corticosteroid plus as-needed SABA or ICS/formoterol",
+      "Daily oral corticosteroid plus a long-acting muscarinic antagonist",
+      "Omalizumab plus a leukotriene receptor antagonist",
+      "High-dose ICS combined with theophylline"
+    ],
+    "answer": 0,
+    "e": "Step 2 uses daily low-dose ICS with as-needed SABA (or ICS/formoterol) for patients with more frequent symptoms or recent exacerbations."
+  },
+  {
+    "q": "At Step 3, adding a long-acting beta-agonist (LABA) to inhaled corticosteroid is preferred over which alternative strategy?",
+    "options": [
+      "Simply increasing the dose of inhaled corticosteroid alone",
+      "Switching to an oral corticosteroid",
+      "Adding omalizumab immediately",
+      "Discontinuing ICS altogether"
+    ],
+    "answer": 0,
+    "e": "Adding a LABA to ICS provides more effective control than increasing the ICS dose alone, making low-dose ICS-LABA the preferred Step 3 add-on."
+  },
+  {
+    "q": "At Step 4 in adults with poor control, the inhaled glucocorticoid dose may be increased up to approximately what daily dose (budesonide or equivalent)?",
+    "options": [
+      "2000 micrograms",
+      "200 micrograms",
+      "20,000 micrograms",
+      "There is no defined upper dose at Step 4"
+    ],
+    "answer": 0,
+    "e": "At Step 4, the inhaled glucocorticoid dose may be increased to roughly 2000 mcg budesonide equivalent daily if control remains poor."
+  },
+  {
+    "q": "At Step 5 of chronic asthma treatment, which therapy becomes necessary for ongoing control?",
+    "options": [
+      "Continuous or frequent oral glucocorticoids at the lowest effective dose",
+      "A single dose of inhaled bronchodilator as needed only",
+      "Complete discontinuation of all controller therapy",
+      "Nebulized saline alone"
+    ],
+    "answer": 0,
+    "e": "Step 5 involves continuous or frequent oral glucocorticoids (e.g., morning prednisolone), given at the lowest dose needed to control symptoms."
+  },
+  {
+    "q": "For patients with a prominent atopic phenotype who remain uncontrolled despite Step 5 therapy, which monoclonal antibody targeting IgE should be considered?",
+    "options": [
+      "Omalizumab",
+      "Mepolizumab",
+      "Infliximab",
+      "Rituximab"
+    ],
+    "answer": 0,
+    "e": "Omalizumab, an anti-IgE monoclonal antibody, is considered for patients with a prominent atopic phenotype who remain uncontrolled at high-intensity therapy."
+  },
+  {
+    "q": "For patients with eosinophilic-mediated severe asthma uncontrolled on Step 5 therapy, which monoclonal antibody blocking IL-5 signaling should be considered?",
+    "options": [
+      "Mepolizumab",
+      "Omalizumab",
+      "Adalimumab",
+      "Trastuzumab"
+    ],
+    "answer": 0,
+    "e": "Mepolizumab blocks IL-5 binding to its receptor on eosinophils and is used for eosinophilic-mediated disease uncontrolled on standard step-up therapy."
+  },
+  {
+    "q": "Once asthma control is established, what is a reasonable step-down strategy for glucocorticoid dosing?",
+    "options": [
+      "Decrease the dose by roughly 25–50% every 3 months",
+      "Stop the glucocorticoid abruptly as soon as symptoms improve",
+      "Increase the dose by 25% every month indefinitely",
+      "Switch immediately to an unrelated drug class with no taper"
+    ],
+    "answer": 0,
+    "e": "A reasonable step-down strategy is reducing the glucocorticoid dose by about 25–50% every 3 months once control is achieved, titrating to the lowest effective dose."
+  },
+  {
+    "q": "Zileuton is a treatment option most specifically considered for which asthma trigger pattern?",
+    "options": [
+      "Cold air and exercise-induced asthma",
+      "Allergic asthma with elevated IgE",
+      "Occupational asthma from flour dust",
+      "GERD-associated nonallergic asthma"
+    ],
+    "answer": 0,
+    "e": "Zileuton, a leukotriene pathway inhibitor, is specifically noted as a consideration for cold air and exercise-induced asthma."
+  },
+  {
+    "q": "Leukotriene receptor antagonists (LTRAs) such as montelukast are particularly considered in which two asthma phenotypes according to the stepwise treatment chart?",
+    "options": [
+      "Aspirin-induced asthma and allergic asthma",
+      "Occupational asthma and cough-variant asthma",
+      "Exercise-induced asthma and adult-onset asthma",
+      "Nonallergic asthma and asthma-COPD overlap only"
+    ],
+    "answer": 0,
+    "e": "LTRAs are specifically highlighted for aspirin (ASA)-induced asthma and allergic asthma in the stepwise treatment approach."
+  },
+  {
+    "q": "In acute severe asthma exacerbation, what is the target oxygen saturation in adults receiving supplemental oxygen?",
+    "options": [
+      "Above 92%",
+      "Above 99%",
+      "Above 80%",
+      "Exactly 100%"
+    ],
+    "answer": 0,
+    "e": "High-flow oxygen (around 60%, humidified if possible) should be given to keep saturation above 92% in adults with an acute exacerbation."
+  },
+  {
+    "q": "For an acute asthma exacerbation, what is a typical nebulized dose of salbutamol, and how often may it be given?",
+    "options": [
+      "5 mg, given 6–12 times daily or as required",
+      "0.5 mg, given once daily",
+      "50 mg, given once weekly",
+      "5 mcg, given continuously by IV infusion only"
+    ],
+    "answer": 0,
+    "e": "Nebulized salbutamol 5 mg (or terbutaline 2.5 mg) may be given 6–12 times daily or as needed during an acute exacerbation."
+  },
+  {
+    "q": "Intravenous magnesium sulfate may provide additional bronchodilation in acute asthma, and is particularly indicated when presenting PEF is below what threshold?",
+    "options": [
+      "30% predicted",
+      "70% predicted",
+      "90% predicted",
+      "There is no PEF threshold; it is first-line for all exacerbations"
+    ],
+    "answer": 0,
+    "e": "IV magnesium sulfate (1.2–2.0 g over 20 minutes) is considered when the presenting PEF is below 30% predicted."
+  },
+  {
+    "q": "If IV aminophylline is used in an acute severe exacerbation, what precaution is specifically recommended?",
+    "options": [
+      "Cardiac monitoring, due to the drug's narrow therapeutic window",
+      "No monitoring is required at any dose",
+      "Continuous EEG monitoring for seizures only",
+      "Monthly renal function testing"
+    ],
+    "answer": 0,
+    "e": "Because of its risk profile, cardiac monitoring is recommended when using IV aminophylline (loading dose then continuous infusion) in severe exacerbations."
+  },
+  {
+    "q": "In the O SHIT mnemonic for immediate asthma treatment, what does the 'H' stand for?",
+    "options": [
+      "Hydrocortisone IV (or oral prednisolone)",
+      "Heliox therapy",
+      "Humidified oxygen",
+      "Histamine blockade"
+    ],
+    "answer": 0,
+    "e": "H stands for hydrocortisone IV 100 mg (or prednisolone 40–50 mg PO), started early to reduce relapse and continued for 5–7 days."
+  },
+  {
+    "q": "In the O SHIT mnemonic, ipratropium bromide (the 'I') is specifically emphasized for use in which severity of attack?",
+    "options": [
+      "Moderate to severe attacks, to enhance bronchodilation",
+      "Only in the mildest attacks, as monotherapy",
+      "Exclusively in patients already on theophylline",
+      "Only after mechanical ventilation has begun"
+    ],
+    "answer": 0,
+    "e": "Nebulized ipratropium bromide is used in moderate to severe attacks, added to enhance bronchodilation alongside SABA."
+  },
+  {
+    "q": "Why is theophylline ('T' in the O SHIT mnemonic) reserved as a rarely used, later option in acute asthma treatment?",
+    "options": [
+      "It carries a risk of toxicity and is used only if SABA and steroids fail",
+      "It has no bronchodilating properties at all",
+      "It works faster than salbutamol and is preferred first-line",
+      "It is contraindicated in all asthma exacerbations"
+    ],
+    "answer": 0,
+    "e": "Theophylline is used only if SABA and steroids fail, given its risk of toxicity — making it a later option rather than a first-line agent."
+  },
+  {
+    "q": "Which set of findings characterizes 'acute severe asthma' on the severity assessment table (short of life-threatening features)?",
+    "options": [
+      "PEF 33–50% predicted, respiratory rate ≥25/min, heart rate ≥110/min, inability to complete sentences",
+      "PEF over 80% predicted with normal vital signs",
+      "PEF under 33% predicted with silent chest and cyanosis",
+      "Normal PEF with isolated nocturnal cough only"
+    ],
+    "answer": 0,
+    "e": "Acute severe asthma is defined by PEF 33–50% predicted, RR ≥25/min, HR ≥110/min, and inability to complete sentences in one breath."
+  },
+  {
+    "q": "Which finding is classified as 'life-threatening' rather than merely 'acute severe' in an asthma exacerbation?",
+    "options": [
+      "A silent chest with cyanosis and a PEF under 33% predicted",
+      "A respiratory rate of exactly 25 breaths per minute",
+      "A heart rate of 110 beats per minute with normal SpO2",
+      "Inability to complete a full sentence but normal PEF"
+    ],
+    "answer": 0,
+    "e": "Life-threatening features include PEF <33% predicted, SpO2 <92%, silent chest, cyanosis, feeble respiratory effort, bradycardia/arrhythmia, hypotension, exhaustion, confusion, or coma."
+  },
+  {
+    "q": "'Near-fatal asthma' is specifically defined by which combination of findings?",
+    "options": [
+      "Raised PaCO2 and/or the need for mechanical ventilation with raised inflation pressures",
+      "A single episode of mild wheeze relieved by SABA",
+      "Normal PaCO2 with mild tachypnea",
+      "PEF between 50–80% predicted with no other findings"
+    ],
+    "answer": 0,
+    "e": "Near-fatal asthma is defined by a raised PaCO2 and/or the requirement for mechanical ventilation with elevated inflation pressures, reflecting the most severe end of the spectrum."
+  },
+  {
+    "q": "Which of the following is listed as an indication for assisted ventilation in acute severe asthma?",
+    "options": [
+      "Deterioration of arterial blood gases despite optimal therapy, with falling PaO2 and rising PaCO2",
+      "A single wheeze heard on auscultation",
+      "Mild tachycardia that resolves with a bronchodilator",
+      "A PEF of 90% predicted"
+    ],
+    "answer": 0,
+    "e": "Indications for assisted ventilation include coma, respiratory arrest, worsening blood gases (falling PaO2, rising PaCO2, falling pH) despite optimal therapy, and exhaustion/confusion/drowsiness."
+  }
+];
+</script>
+
+<script>
+/* ===== Quiz engine ===== */
+(function(){
+  const bank = QUESTIONS.map(q=>({...q}));
+  const quizEl = document.getElementById('quiz');
+  const totalEl = document.getElementById('total');
+  const answeredEl = document.getElementById('answered');
+  const scorepillEl = document.getElementById('scorepill');
+  const barfill = document.getElementById('barfill');
+  const submitBtn = document.getElementById('submitBtn');
+  const submitRow = document.getElementById('submitRow');
+  const hint = document.getElementById('hint');
+  const resultEl = document.getElementById('result');
+  const LETTERS = ['A','B','C','D','E','F'];
+  const PASS = 70;
+
+  let state = [];
+
+  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+  function build(){
+    quizEl.innerHTML='';
+    state = bank.map(()=>({answered:false,correct:false}));
+    totalEl.textContent = bank.length;
+
+    bank.forEach((item,qi)=>{
+      // shuffle options, track correct index
+      const order = shuffle(item.options.map((t,idx)=>({t,idx})));
+      const correctPos = order.findIndex(o=>o.idx===item.answer);
+
+      const card = document.createElement('div');
+      card.className='q';
+      card.id='q'+qi;
+
+      const head = document.createElement('div');
+      head.className='q-head';
+      head.innerHTML = `<span class="q-num">Q${String(qi+1).padStart(2,'0')}</span><span class="q-text"></span>`;
+      head.querySelector('.q-text').textContent = item.q;
+      card.appendChild(head);
+
+      const opts = document.createElement('div');
+      opts.className='opts';
+      order.forEach((o,pos)=>{
+        const b = document.createElement('button');
+        b.className='opt';
+        b.innerHTML = `<span class="tag">${LETTERS[pos]}</span><span class="txt"></span><span class="mark"></span>`;
+        b.querySelector('.txt').textContent = o.t;
+        b.addEventListener('click',()=>choose(qi,pos,correctPos,opts,exp));
+        opts.appendChild(b);
+      });
+      card.appendChild(opts);
+
+      const exp = document.createElement('div');
+      exp.className='explain';
+      exp.innerHTML = `<b>Why:</b> ${item.e}`;
+      card.appendChild(exp);
+
+      quizEl.appendChild(card);
+    });
+    update();
+  }
+
+  function choose(qi,pos,correctPos,optsEl,expEl){
+    if(state[qi].answered) return;
+    state[qi].answered=true;
+    state[qi].correct = (pos===correctPos);
+    const buttons=[...optsEl.children];
+    buttons.forEach((b,i)=>{
+      b.disabled=true;
+      if(i===correctPos){b.classList.add('correct');b.querySelector('.mark').textContent='✓';}
+      if(i===pos && pos!==correctPos){b.classList.add('wrong');b.querySelector('.mark').textContent='✗';}
+    });
+    expEl.classList.add('show');
+    update();
+  }
+
+  function update(){
+    const answered = state.filter(s=>s.answered).length;
+    const correct = state.filter(s=>s.correct).length;
+    answeredEl.textContent = answered;
+    scorepillEl.textContent = correct+' correct';
+    barfill.style.width = (answered/bank.length*100)+'%';
+    const done = answered===bank.length;
+    submitBtn.disabled = !done;
+    hint.textContent = done ? 'All answered — lock in your score' : (bank.length-answered)+' left';
+  }
+
+  submitBtn.addEventListener('click',()=>{
+    const correct = state.filter(s=>s.correct).length;
+    const pct = Math.round(correct/bank.length*100);
+    const pass = pct>=PASS;
+    resultEl.className='result show '+(pass?'pass':'fail');
+    document.getElementById('verdict').textContent = pass?'Pass':'Keep reviewing';
+    document.getElementById('bigscore').textContent = pct+'%';
+    document.getElementById('resultDetail').textContent =
+      `${correct} of ${bank.length} correct · passing mark is ${PASS}%`;
+    submitRow.style.display='none';
+    resultEl.scrollIntoView({behavior:'smooth',block:'center'});
+  });
+
+  window.retry=function(){
+    resultEl.className='result';
+    submitRow.style.display='';
+    build();
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+
+  build();
+})();
+</script>
+</body>
+</html>

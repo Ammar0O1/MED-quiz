@@ -96,15 +96,39 @@
     color:var(--faint);border:1px solid var(--line);border-radius:6px;padding:3px 8px;flex:none;}
 
   .foot{margin-top:40px;font-family:var(--mono);font-size:12.5px;color:var(--faint);text-align:center;}
+
+  .section{margin-bottom:38px;}
+  .section-head{display:flex;align-items:baseline;gap:10px;margin-bottom:14px;}
+  .section-head h2{font-family:var(--mono);font-size:14px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;margin:0;}
+  .section-head .line{flex:1;height:1px;background:var(--line);}
 </style>
 </head>
 <body>
 <div class="bg" id="bg" aria-hidden="true"></div>
 <div class="wrap">
-  <span class="eyebrow">Medical Sciences · Molecular Genetics</span>
-  <h1>Genetics <span class="flow">Quiz Hub</span></h1>
+  <span class="eyebrow">Medical Sciences · Quiz Hub</span>
+  <h1>Medicine <span class="flow">Quiz Hub</span></h1>
   <p class="lede">Self-test decks built from the lecture slides. Instant feedback on every question, a score at the end. Pick a topic to begin.</p>
-  <p class="dogma"><b>DNA</b> &rarr; replication &rarr; mutation &rarr; repair &nbsp;·&nbsp; <b>DNA</b> &rarr; transcription &rarr; <b>RNA</b> &rarr; translation &rarr; <b>protein</b></p>
+
+  <div class="section">
+    <div class="section-head"><h2>Respiratory Module</h2><span class="line"></span></div>
+    <div class="grid">
+      <a class="card live" style="--c:#f87171" href="lecture-0-asthma.html">
+        <span class="num">01</span>
+        <span class="body">
+          <p class="title">Asthma</p>
+          <span class="meta">63 questions · triggers, pathophysiology, treatment</span>
+        </span>
+        <span class="arrow">&rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>Molecular Genetics</h2><span class="line"></span></div>
+    <p class="dogma"><b>DNA</b> &rarr; replication &rarr; mutation &rarr; repair &nbsp;·&nbsp; <b>DNA</b> &rarr; transcription &rarr; <b>RNA</b> &rarr; translation &rarr; <b>protein</b></p>
+
 
   <div class="grid">
     <a class="card live" style="--c:#38bdf8" href="lecture-1-dna-replication.html">
@@ -151,6 +175,7 @@
       </span>
       <span class="arrow">&rarr;</span>
     </a>
+  </div>
   </div>
 
   <p class="foot">Tap a topic → answer → see the correct answer instantly → get your score.</p>

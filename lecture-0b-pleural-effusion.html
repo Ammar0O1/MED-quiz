@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Pleural Effusion — Quiz</title>
+<style>
+  :root{
+    --ink:#0a0e14; --ink-2:#0f1620; --panel:#121b28; --panel-2:#16212f;
+    --line:#1f2d3f; --line-2:#293a50;
+    --text:#e6edf5; --muted:#8598ad; --faint:#5a6b82;
+    --accent:#fb923c; --accent-2:#f97316; --accent-soft:rgba(251,146,60,0.12);
+    --good:#34d399; --good-soft:rgba(52,211,153,0.14); --good-line:rgba(52,211,153,0.5);
+    --bad:#f87171; --bad-soft:rgba(248,113,113,0.13); --bad-line:rgba(248,113,113,0.5);
+    --gold:#fbbf24;
+    --mono:'SF Mono',ui-monospace,'Cascadia Code','JetBrains Mono',Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;background:var(--ink);color:var(--text);font-family:var(--sans);
+    line-height:1.55;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background-image:radial-gradient(1200px 600px at 80% -10%,rgba(56,189,248,0.06),transparent 60%),radial-gradient(900px 500px at -10% 110%,rgba(56,189,248,0.05),transparent 60%);
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:22px 18px 96px;}
+
+  /* top bar */
+  .top{display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap;}
+  .back{
+    display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--muted);
+    font-family:var(--mono);font-size:13px;padding:9px 14px;border:1px solid var(--line);
+    border-radius:11px;background:var(--panel);transition:.15s;
+  }
+  .back:active{background:var(--panel-2);}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--accent);
+    text-transform:uppercase;border:1px solid var(--line-2);padding:6px 12px;border-radius:20px;background:var(--accent-soft);}
+
+  h1{font-family:var(--mono);font-size:clamp(26px,6vw,38px);font-weight:700;letter-spacing:-.01em;
+    margin:6px 0 6px;line-height:1.1;}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 22px;max-width:60ch;}
+
+  /* progress */
+  .progress-wrap{position:sticky;top:8px;z-index:20;margin-bottom:26px;}
+  .progress-card{background:rgba(15,22,32,0.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid var(--line);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:14px;}
+  .progress-meta{font-family:var(--mono);font-size:12.5px;color:var(--muted);white-space:nowrap;}
+  .progress-meta b{color:var(--text);}
+  .bar{flex:1;height:7px;background:var(--ink-2);border-radius:99px;overflow:hidden;border:1px solid var(--line);}
+  .bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent-2),var(--accent));
+    border-radius:99px;transition:width .35s cubic-bezier(.4,0,.2,1);}
+  .score-pill{font-family:var(--mono);font-size:12.5px;color:var(--good);white-space:nowrap;}
+
+  /* question card */
+  .q{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 18px;margin-bottom:16px;
+    scroll-margin-top:90px;}
+  .q-head{display:flex;gap:12px;align-items:baseline;margin-bottom:14px;}
+  .q-num{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700;flex:none;
+    border:1px solid var(--line-2);background:var(--accent-soft);border-radius:8px;padding:3px 9px;min-width:44px;text-align:center;}
+  .q-text{font-size:16.5px;font-weight:600;line-height:1.5;letter-spacing:-.005em;}
+  .opts{display:flex;flex-direction:column;gap:9px;margin-top:4px;}
+  .opt{
+    display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;
+    background:var(--panel-2);border:1px solid var(--line);border-radius:12px;
+    padding:14px 15px;color:var(--text);font-size:15.5px;font-family:inherit;line-height:1.45;
+    cursor:pointer;transition:border-color .15s,background .15s,transform .06s;
+  }
+  .opt:active{transform:scale(.994);}
+  @media(hover:hover){.opt:not(:disabled):hover{border-color:var(--accent-2);background:var(--panel);}}
+  .opt .tag{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--muted);flex:none;
+    width:24px;height:24px;border-radius:7px;border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .opt .txt{flex:1;}
+  .opt:disabled{cursor:default;}
+  .opt.correct{background:var(--good-soft);border-color:var(--good-line);}
+  .opt.correct .tag{color:var(--good);border-color:var(--good-line);background:var(--good-soft);}
+  .opt.wrong{background:var(--bad-soft);border-color:var(--bad-line);}
+  .opt.wrong .tag{color:var(--bad);border-color:var(--bad-line);background:var(--bad-soft);}
+  .opt .mark{margin-left:auto;font-family:var(--mono);font-size:13px;font-weight:700;flex:none;align-self:center;}
+  .opt.correct .mark{color:var(--good);}
+  .opt.wrong .mark{color:var(--bad);}
+
+  .explain{margin-top:13px;border-left:3px solid var(--accent-2);background:var(--ink-2);
+    border-radius:0 10px 10px 0;padding:12px 15px;font-size:14.5px;color:var(--muted);display:none;}
+  .explain.show{display:block;animation:fade .25s ease;}
+  .explain b{color:var(--text);font-weight:600;}
+  @keyframes fade{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+
+  /* result */
+  .result{background:linear-gradient(160deg,var(--panel),var(--ink-2));border:1px solid var(--line-2);
+    border-radius:18px;padding:30px 22px;text-align:center;margin-top:8px;display:none;}
+  .result.show{display:block;animation:fade .3s ease;}
+  .result .verdict{font-family:var(--mono);font-size:14px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px;}
+  .result.pass .verdict{color:var(--good);}
+  .result.fail .verdict{color:var(--gold);}
+  .result .big{font-family:var(--mono);font-size:56px;font-weight:700;line-height:1;margin:6px 0;}
+  .result .detail{color:var(--muted);font-size:15px;margin-bottom:20px;}
+  .result .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .btn{font-family:var(--mono);font-size:14px;padding:12px 20px;border-radius:11px;border:1px solid var(--line-2);
+    background:var(--panel-2);color:var(--text);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:.15s;}
+  .btn:active{transform:scale(.97);}
+  .btn.primary{background:var(--accent-2);border-color:var(--accent);color:#04121c;font-weight:700;}
+
+  .submit-row{margin-top:8px;text-align:center;}
+  .submit-btn{font-family:var(--mono);font-size:15px;font-weight:700;padding:15px 30px;border-radius:13px;
+    border:1px solid var(--accent);background:var(--accent-2);color:#04121c;cursor:pointer;transition:.15s;width:100%;max-width:340px;}
+  .submit-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .submit-btn:not(:disabled):active{transform:scale(.98);}
+  .hint{font-family:var(--mono);font-size:12.5px;color:var(--faint);margin-top:12px;}
+
+  @media(min-width:768px){
+    .wrap{padding:34px 26px 110px;}
+    .q{padding:24px 24px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="index.html">&larr; All lectures</a>
+    <span class="eyebrow">Respiratory Module · Pleural Effusion</span>
+  </div>
+  <h1>Pleural Effusion</h1>
+  <p class="sub">Anatomy, pathophysiology, etiology, Light's criteria, pleural fluid analysis, treatment, and hard clinical vignettes. Tap an answer to lock it in and see instant feedback.</p>
+
+  <div class="progress-wrap">
+    <div class="progress-card">
+      <span class="progress-meta"><b id="answered">0</b>/<span id="total">0</span> answered</span>
+      <div class="bar"><i id="barfill"></i></div>
+      <span class="score-pill" id="scorepill">0 correct</span>
+    </div>
+  </div>
+
+  <div id="quiz"></div>
+
+  <div class="submit-row" id="submitRow">
+    <button class="submit-btn" id="submitBtn" disabled>Finish &amp; see score</button>
+    <div class="hint" id="hint">Answer all questions to finish</div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="verdict" id="verdict"></div>
+    <div class="big" id="bigscore"></div>
+    <div class="detail" id="resultDetail"></div>
+    <div class="actions">
+      <button class="btn primary" onclick="retry()">Try again</button>
+      <a class="btn" href="index.html">Back to lectures</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== Question bank =====
+   answer = index of correct option. Options are shuffled at render so position carries no signal. */
+const QUESTIONS = [
+  {
+    "q": "The pleural space is best described as:",
+    "options": [
+      "A potential space between the parietal and visceral pleura, normally containing 5–15 mL of fluid",
+      "A true anatomical cavity that is normally completely empty",
+      "A space that only exists once fluid has pathologically accumulated",
+      "A space located between the lung parenchyma and the bronchial tree"
+    ],
+    "answer": 0,
+    "e": "The pleural space is a thin potential space between parietal and visceral pleura that normally contains a small physiologic volume (5–15 mL) of lubricating fluid, not zero."
+  },
+  {
+    "q": "Which pleural layer lines the chest wall and diaphragm, as opposed to covering the lung surface itself?",
+    "options": [
+      "The parietal pleura",
+      "The visceral pleura",
+      "The mediastinal pleura only",
+      "Neither layer lines the chest wall"
+    ],
+    "answer": 0,
+    "e": "The parietal pleura lines the chest wall and diaphragm, while the visceral pleura covers the lung itself."
+  },
+  {
+    "q": "Under normal physiology, pleural fluid is primarily produced by which structure and cleared by which system?",
+    "options": [
+      "Produced by the parietal pleura's vessels; cleared by the lymphatic system",
+      "Produced by the visceral pleura's vessels; cleared by the bronchial venous system",
+      "Produced equally by both pleural layers; cleared by direct venous reabsorption only",
+      "Produced by alveolar macrophages; cleared by mucociliary transport"
+    ],
+    "answer": 0,
+    "e": "Pleural fluid is mainly produced by small vessels in the parietal pleura and drained by the lymphatic system, particularly lymphatics associated with the parietal pleura."
+  },
+  {
+    "q": "What is the primary physiologic function of the small volume of pleural fluid present in a healthy person?",
+    "options": [
+      "It acts as a lubricant, allowing smooth gliding of lung and chest wall during breathing",
+      "It supplies oxygen directly to the visceral pleura",
+      "It buffers pH changes generated by respiratory acidosis",
+      "It transports surfactant from the alveoli to the pleural surface"
+    ],
+    "answer": 0,
+    "e": "The small physiologic volume of pleural fluid lubricates the pleural surfaces, reducing friction as the lungs expand and contract against the chest wall."
+  },
+  {
+    "q": "In congestive heart failure, pleural effusion develops primarily through which mechanism?",
+    "options": [
+      "Increased hydrostatic pressure forcing fluid into the pleural space",
+      "Decreased oncotic pressure from hypoalbuminemia",
+      "Increased vascular permeability from local inflammation",
+      "Obstruction of pleural lymphatic drainage by tumor"
+    ],
+    "answer": 0,
+    "e": "CHF raises pulmonary capillary wedge pressure, increasing hydrostatic pressure and forcing fluid across pleural vessels — a transudative mechanism, not permeability or lymphatic obstruction."
+  },
+  {
+    "q": "Hepatic hydrothorax in liver cirrhosis develops mainly through which pathophysiologic mechanism?",
+    "options": [
+      "Decreased oncotic pressure from hypoalbuminemia",
+      "Increased hydrostatic pressure from elevated central venous pressure",
+      "Direct bacterial invasion of the pleural space",
+      "Increased capillary permeability from cytokine release"
+    ],
+    "answer": 0,
+    "e": "Cirrhosis lowers serum albumin, reducing plasma oncotic pressure and allowing fluid to leak into the pleural space — a transudative process, distinct from CHF's hydrostatic mechanism."
+  },
+  {
+    "q": "Nephrotic syndrome causes pleural effusion through which pathway?",
+    "options": [
+      "Urinary protein loss lowering oncotic pressure",
+      "Renal hypertension raising pulmonary hydrostatic pressure",
+      "Immune complex deposition directly on the pleura",
+      "Obstruction of the thoracic duct by glomerular immune complexes"
+    ],
+    "answer": 0,
+    "e": "Excess protein loss in the urine lowers serum oncotic pressure, favoring fluid movement into the pleural space, just as hypoalbuminemia does in cirrhosis."
+  },
+  {
+    "q": "Parapneumonic effusion and malignant pleural effusion typically arise through which shared underlying mechanism?",
+    "options": [
+      "Increased vascular permeability from inflammation or cytokine release",
+      "Decreased hydrostatic pressure across pleural capillaries",
+      "Increased plasma oncotic pressure driving fluid outward",
+      "Decreased pulmonary arterial pressure reducing capillary leak"
+    ],
+    "answer": 0,
+    "e": "Both infection and malignancy provoke local inflammation and cytokine release, increasing capillary permeability and producing a protein-rich exudative effusion."
+  },
+  {
+    "q": "Why does pulmonary embolism cause a pleural effusion in some patients?",
+    "options": [
+      "Inflammation from the infarcted lung segment increases vascular permeability",
+      "PE always raises pulmonary capillary hydrostatic pressure diffusely",
+      "PE directly obstructs pleural lymphatic vessels",
+      "PE lowers plasma oncotic pressure through consumptive coagulopathy"
+    ],
+    "answer": 0,
+    "e": "Localized inflammation from a pulmonary infarct increases vascular permeability at the site, producing an exudative effusion, rather than a global hydrostatic or oncotic mechanism."
+  },
+  {
+    "q": "Malignant pleural effusion can occur via impaired lymphatic clearance when tumor cells do what?",
+    "options": [
+      "Directly obstruct pleural lymphatic drainage channels",
+      "Increase plasma oncotic pressure around the tumor",
+      "Reduce parietal pleural vessel permeability, limiting fluid production",
+      "Increase thoracic duct diameter, accelerating clearance"
+    ],
+    "answer": 0,
+    "e": "In addition to increasing capillary permeability, malignancy can mechanically obstruct lymphatic drainage pathways, further promoting fluid accumulation."
+  },
+  {
+    "q": "Chylothorax results from which specific injury?",
+    "options": [
+      "Damage to the thoracic duct, blocking lymphatic clearance of chyle",
+      "Rupture of a pulmonary vein, causing lymphatic backflow",
+      "Direct bacterial infection of the pleural lymphatics",
+      "Increased hydrostatic pressure within the azygos vein"
+    ],
+    "answer": 0,
+    "e": "Chylothorax arises when trauma or malignancy damages the thoracic duct, blocking lymphatic clearance and allowing chyle to accumulate in the pleural space."
+  },
+  {
+    "q": "Fibrothorax contributes to pleural fluid accumulation through which mechanism?",
+    "options": [
+      "Thickened pleura from prior infection or inflammation traps fluid and impairs lymphatic function",
+      "Acute inflammation increases hydrostatic pressure only",
+      "It always indicates active tuberculosis reactivation",
+      "It selectively increases oncotic pressure within the pleura"
+    ],
+    "answer": 0,
+    "e": "Fibrothorax reflects chronic pleural thickening (often post-infectious) that physically traps fluid and impairs normal lymphatic clearance."
+  },
+  {
+    "q": "Lymphangitic carcinomatosis causes pleural fluid accumulation because cancer cells do what to the pleura?",
+    "options": [
+      "Infiltrate lymphatic vessels within the pleura, impairing clearance",
+      "Directly replace parietal pleural mesothelial cells with keratin",
+      "Selectively block only venous return from the lung apex",
+      "Cause reflex bronchoconstriction, raising airway pressure"
+    ],
+    "answer": 0,
+    "e": "Lymphangitic carcinomatosis involves cancer infiltrating the pleural lymphatic vessels themselves, impairing the normal clearance pathway rather than affecting production."
+  },
+  {
+    "q": "By content, how are transudative and exudative pleural effusions fundamentally distinguished?",
+    "options": [
+      "Transudates are low in protein/cells from systemic pressure changes; exudates are protein-rich from local pleural disease/inflammation",
+      "Transudates are always infected; exudates are always sterile",
+      "Transudates arise only from malignancy; exudates arise only from heart failure",
+      "Transudates are exclusively unilateral; exudates are exclusively bilateral"
+    ],
+    "answer": 0,
+    "e": "Transudates form from altered systemic hydrostatic/oncotic pressures with intact capillaries (low protein); exudates form from local inflammatory disease with increased vascular permeability (protein-rich)."
+  },
+  {
+    "q": "Which of the following is classified as an 'other' cause of pleural effusion distinct from the typical transudative/exudative categories, resulting from chest trauma?",
+    "options": [
+      "Hemothorax",
+      "Nephrotic syndrome",
+      "Tuberculosis",
+      "Congestive heart failure"
+    ],
+    "answer": 0,
+    "e": "Hemothorax (blood in the pleural space from trauma) is grouped separately, alongside chylothorax and empyema, distinct from the classic transudative and exudative categories."
+  },
+  {
+    "q": "According to the lecture, what is the single most common overall cause of pleural effusion?",
+    "options": [
+      "Heart failure",
+      "Pneumonia",
+      "Pulmonary embolism",
+      "Malignancy"
+    ],
+    "answer": 0,
+    "e": "Heart failure is listed as the most common cause of pleural effusion overall, ahead of pneumonia, pulmonary embolism, tuberculosis, and lung cancer."
+  },
+  {
+    "q": "Which of the following pairs correctly matches a transudative cause with its driving abnormality?",
+    "options": [
+      "Nephrotic syndrome — decreased oncotic pressure from proteinuria",
+      "Tuberculosis — decreased hydrostatic pressure",
+      "Empyema — decreased oncotic pressure",
+      "Pulmonary embolism — decreased vascular permeability"
+    ],
+    "answer": 0,
+    "e": "Nephrotic syndrome causes urinary protein loss, lowering oncotic pressure — a classic transudative mechanism. TB, empyema, and PE are all exudative, driven by inflammation/permeability, not oncotic changes."
+  },
+  {
+    "q": "Below approximately what fluid volume are pleural effusions typically asymptomatic?",
+    "options": [
+      "300 mL",
+      "30 mL",
+      "3000 mL",
+      "3 mL"
+    ],
+    "answer": 0,
+    "e": "Small effusions under roughly 300 mL are often asymptomatic; larger volumes are more likely to produce dyspnea and other symptoms."
+  },
+  {
+    "q": "The pleuritic chest pain of pleural effusion is typically described as:",
+    "options": [
+      "Sharp, retrosternal pain",
+      "Dull, colicky pain radiating to the back",
+      "Burning pain relieved by antacids",
+      "Crushing, exertional pain radiating to the left arm"
+    ],
+    "answer": 0,
+    "e": "Pleuritic chest pain in pleural effusion is characteristically sharp and retrosternal, distinct from the dull, burning, or crushing pain patterns of other conditions."
+  },
+  {
+    "q": "On chest percussion, an area of pleural effusion typically produces which finding?",
+    "options": [
+      "Dullness",
+      "Hyperresonance",
+      "Tympany",
+      "Normal resonance"
+    ],
+    "answer": 0,
+    "e": "Fluid in the pleural space produces dullness to percussion over the affected area, in contrast to the hyperresonance seen with pneumothorax."
+  },
+  {
+    "q": "How does tactile fremitus change over an area of pleural effusion, and why?",
+    "options": [
+      "It is reduced, because fluid dampens transmission of vibrations to the chest wall",
+      "It is increased, because fluid transmits vibrations more efficiently than air",
+      "It is unchanged, since fremitus reflects only underlying bone density",
+      "It disappears entirely and cannot be tested in any effusion"
+    ],
+    "answer": 0,
+    "e": "Fluid in the pleural space dampens the transmission of vocal vibrations to the chest wall, reducing (not increasing) tactile fremitus over the effusion."
+  },
+  {
+    "q": "A pleural friction rub, when present, is best described as:",
+    "options": [
+      "A squeaking sound from inflamed pleural layers rubbing together during inspiration and expiration",
+      "A high-pitched wheeze heard only on forced expiration",
+      "A low-pitched rumble heard best at the cardiac apex",
+      "A crackling sound heard only during deep inspiration in the lung bases"
+    ],
+    "answer": 0,
+    "e": "A pleural friction rub is a squeaking or grating sound produced by inflamed, roughened pleural surfaces rubbing together with each breath — distinct from wheeze, a cardiac murmur, or crackles."
+  },
+  {
+    "q": "Which associated symptom would most specifically point toward malignancy as the underlying cause of a patient's pleural effusion?",
+    "options": [
+      "Cachexia",
+      "Fever",
+      "Bilateral leg edema with orthopnea",
+      "Ascites with palmar erythema"
+    ],
+    "answer": 0,
+    "e": "Cachexia (progressive wasting) is highlighted as a symptom pointing toward malignancy, whereas fever suggests empyema and orthopnea/edema suggest heart failure."
+  },
+  {
+    "q": "Pleural effusion caused by heart failure is typically:",
+    "options": [
+      "Bilateral, or if unilateral, more often right-sided",
+      "Bilateral, or if unilateral, more often left-sided",
+      "Always strictly unilateral on the left",
+      "Always strictly bilateral, never unilateral"
+    ],
+    "answer": 0,
+    "e": "Heart failure-related effusions are usually bilateral, and when unilateral, are more commonly right-sided; a left-sided unilateral effusion is less likely to be from heart failure alone."
+  },
+  {
+    "q": "A patient with known left ventricular failure develops a small, typical-appearing bilateral pleural effusion with no atypical features. What is the most appropriate initial approach?",
+    "options": [
+      "Treat the heart failure and re-evaluate the effusion, without necessarily sampling the fluid",
+      "Perform thoracentesis on every patient with heart failure before any treatment",
+      "Proceed directly to VATS for tissue diagnosis",
+      "Withhold heart failure treatment until pleural fluid results return"
+    ],
+    "answer": 0,
+    "e": "When the clinical picture is typical for a known transudative cause like LV failure, and no atypical features are present, treating the underlying condition and reassessing the effusion is appropriate — sampling is reserved for atypical or nonresolving cases."
+  },
+  {
+    "q": "A patient with pneumonia has a small pleural effusion and is clinically improving on antibiotics. What is the most appropriate management of the effusion?",
+    "options": [
+      "Aspiration may not be needed unless the effusion is still present on follow-up",
+      "Immediate thoracentesis is mandatory regardless of clinical trajectory",
+      "Chest tube drainage should be placed prophylactically",
+      "VATS decortication should be scheduled empirically"
+    ],
+    "answer": 0,
+    "e": "In a small parapneumonic effusion with clinical improvement, aspiration can be deferred unless the effusion persists on follow-up — most other circumstances do require diagnostic sampling."
+  },
+  {
+    "q": "What is a key limitation of radiological investigations (CXR, ultrasound, CT) in the workup of pleural effusion?",
+    "options": [
+      "They can detect the presence of an effusion but cannot identify its underlying cause",
+      "They cannot detect effusions smaller than 1 liter in volume",
+      "They are contraindicated in any patient with suspected malignancy",
+      "They can only be performed after thoracentesis has already been done"
+    ],
+    "answer": 0,
+    "e": "Radiological studies localize and characterize the effusion but cannot determine its etiology — that requires pleural fluid analysis via thoracentesis."
+  },
+  {
+    "q": "Which chest X-ray view is most sensitive for detecting a small pleural effusion, capable of identifying as little as 5 mL of fluid?",
+    "options": [
+      "Lateral decubitus view",
+      "Standard posteroanterior (PA) view only",
+      "Apical lordotic view",
+      "Expiratory PA view"
+    ],
+    "answer": 0,
+    "e": "The lateral decubitus view is the most sensitive plain-film technique, able to detect effusions as small as 5 mL by allowing fluid to layer along the dependent chest wall."
+  },
+  {
+    "q": "The classic 'meniscus sign' on chest X-ray refers to:",
+    "options": [
+      "A homogeneous density with a curved, meniscus-shaped upper margin at the costophrenic angle",
+      "A sharply demarcated horizontal air-fluid level",
+      "Bilateral symmetric hilar enlargement",
+      "A rounded density with well-defined borders in the lung apex"
+    ],
+    "answer": 0,
+    "e": "The meniscus sign describes the curved, meniscus-shaped margin of pleural fluid layering against the chest wall, typically with blunting of the costophrenic angle."
+  },
+  {
+    "q": "On chest X-ray, a massive pleural effusion causing complete opacification of a hemithorax would be expected to cause tracheal deviation in which direction?",
+    "options": [
+      "Away from the effusion",
+      "Toward the effusion",
+      "No tracheal deviation occurs with any size effusion",
+      "Deviation only occurs with pneumothorax, never with effusion"
+    ],
+    "answer": 0,
+    "e": "A large effusion causes mass effect that pushes the mediastinum and trachea away from the affected side, unlike a collapsed lung, which pulls structures toward the affected side."
+  },
+  {
+    "q": "Thoracocentesis is best described as which type of procedure?",
+    "options": [
+      "Both diagnostic and therapeutic",
+      "Purely diagnostic, with no therapeutic value",
+      "Purely therapeutic, with no diagnostic value",
+      "A surgical procedure requiring general anesthesia"
+    ],
+    "answer": 0,
+    "e": "Thoracocentesis serves both diagnostic purposes (fluid analysis) and therapeutic purposes (symptom relief from fluid removal)."
+  },
+  {
+    "q": "According to Light's criteria, a pleural effusion is classified as exudative if which of the following is true?",
+    "options": [
+      "Pleural fluid/serum protein ratio is greater than 0.5",
+      "Pleural fluid/serum protein ratio is less than 0.5",
+      "Pleural fluid LDH/serum LDH ratio is less than 0.6",
+      "Pleural fluid protein is less than 3.0 g/dL"
+    ],
+    "answer": 0,
+    "e": "Light's criteria classify an effusion as exudative if pleural/serum protein ratio >0.5, pleural/serum LDH ratio >0.6, OR pleural LDH exceeds 2/3 of the upper limit of normal serum LDH — meeting any one is sufficient."
+  },
+  {
+    "q": "How many of Light's three criteria must be met for a pleural effusion to be classified as exudative?",
+    "options": [
+      "One or more",
+      "All three simultaneously",
+      "Exactly two, no more and no fewer",
+      "None; Light's criteria only diagnose transudates"
+    ],
+    "answer": 0,
+    "e": "Light's criteria require meeting just one or more of the three conditions (protein ratio, LDH ratio, or absolute LDH threshold) to classify an effusion as exudative."
+  },
+  {
+    "q": "A patient's pleural fluid LDH is exactly two-thirds of the upper limit of normal for serum LDH, with a pleural/serum protein ratio of 0.4 and a pleural/serum LDH ratio of 0.55. How should this effusion be classified by Light's criteria?",
+    "options": [
+      "Exudative, because the pleural LDH meets the two-thirds-of-ULN threshold on its own",
+      "Transudative, because neither ratio individually exceeds its cutoff",
+      "Indeterminate, requiring a fourth criterion to decide",
+      "Transudative, because two of three criteria were not met"
+    ],
+    "answer": 0,
+    "e": "Light's criteria only require ONE of the three conditions to be met. Even though both ratios fall short of their cutoffs, meeting the LDH-vs-ULN threshold alone is sufficient to classify the effusion as exudative."
+  },
+  {
+    "q": "Compared with a transudate, an exudative pleural effusion typically shows which combination of glucose and pH findings?",
+    "options": [
+      "Lower glucose and lower pH",
+      "Higher glucose and higher pH",
+      "Normal glucose with lower pH only",
+      "Higher glucose with normal pH"
+    ],
+    "answer": 0,
+    "e": "Exudative effusions, especially with infection or malignancy, tend to show reduced glucose and reduced pH compared to the normal glucose and normal pH typical of transudates."
+  },
+  {
+    "q": "Typical transudative pleural fluid protein and appearance are best described as:",
+    "options": [
+      "Protein under 3.0 g/dL, clear and straw-colored",
+      "Protein over 3.0 g/dL, cloudy and turbid",
+      "Protein under 1.0 g/dL, grossly bloody",
+      "Protein over 5.0 g/dL, milky white"
+    ],
+    "answer": 0,
+    "e": "Transudative fluid is typically low protein (<3.0 g/dL) and appears clear, straw-colored — in contrast to the higher-protein, cloudy/turbid appearance of exudates."
+  },
+  {
+    "q": "A pleural fluid cholesterol level above 45 mg/dL is most consistent with which classification?",
+    "options": [
+      "Exudative effusion",
+      "Transudative effusion",
+      "Neither; cholesterol has no diagnostic value in pleural fluid",
+      "Chylothorax specifically, to the exclusion of other exudates"
+    ],
+    "answer": 0,
+    "e": "Pleural fluid cholesterol above 45 mg/dL supports an exudative classification, one of the additional criteria (alongside Light's) sometimes used to classify effusions."
+  },
+  {
+    "q": "A pleural fluid neutrophil count exceeding 50,000/µL most strongly suggests which diagnosis?",
+    "options": [
+      "Empyema",
+      "Tuberculous pleurisy",
+      "Chylothorax",
+      "Sarcoidosis"
+    ],
+    "answer": 0,
+    "e": "Extremely elevated neutrophils (>50,000/µL) strongly suggest empyema, whereas TB and sarcoidosis are classically lymphocyte-predominant, and chylothorax is defined by triglycerides, not neutrophils."
+  },
+  {
+    "q": "A pleural fluid neutrophil count above 10,000/µL, without reaching the empyema-level threshold, is most consistent with:",
+    "options": [
+      "Parapneumonic effusion",
+      "Tuberculous pleurisy",
+      "Rheumatoid pleurisy",
+      "Malignancy"
+    ],
+    "answer": 0,
+    "e": "Neutrophil counts above 10,000/µL are typical of parapneumonic effusion; reaching above 50,000/µL raises specific concern for empyema."
+  },
+  {
+    "q": "Pleural fluid lymphocyte predominance of 85–95% should raise strong suspicion for which classic diagnosis?",
+    "options": [
+      "Tuberculous pleurisy",
+      "Acute bacterial empyema",
+      "Acute pancreatitis",
+      "Hemothorax"
+    ],
+    "answer": 0,
+    "e": "Marked lymphocytic predominance (85–95%) is classically associated with tuberculous pleurisy, though malignancy, sarcoidosis, rheumatoid pleurisy, and chylothorax can also show lymphocytosis."
+  },
+  {
+    "q": "Pleural fluid eosinophilia above 10% is best interpreted as:",
+    "options": [
+      "A nonspecific finding that broadens the differential rather than pointing to one diagnosis",
+      "Diagnostic specifically and only for parasitic infection",
+      "Diagnostic specifically and only for tuberculosis",
+      "Pathognomonic for malignant pleural effusion"
+    ],
+    "answer": 0,
+    "e": "Eosinophilia in pleural fluid has a broad differential (blood or air in the pleural space, parasitic infection, pulmonary infarction, drug reaction, TB) and does not point to one specific diagnosis."
+  },
+  {
+    "q": "A patient with a several-day history of pneumonia develops a pleural effusion with a neutrophil-predominant cell count and elevated WBCs. Very advanced empyema can sometimes show a paradoxically low WBC count. Why?",
+    "options": [
+      "Because of cell lysis in long-standing, heavily purulent fluid",
+      "Because bacteria actively suppress neutrophil production systemically",
+      "Because antibiotics always sterilize the fluid before sampling",
+      "Because empyema never produces a true inflammatory response"
+    ],
+    "answer": 0,
+    "e": "In very advanced empyema, ongoing cell lysis within the purulent fluid can paradoxically lower the measured WBC count despite severe infection — a pitfall worth recognizing."
+  },
+  {
+    "q": "A pleural fluid pH below 7.20 in the setting of pneumonia most strongly suggests:",
+    "options": [
+      "A complicated parapneumonic effusion, usually requiring drainage",
+      "A simple transudative effusion requiring no intervention",
+      "Chylothorax from thoracic duct injury",
+      "Urinothorax from urinary tract obstruction"
+    ],
+    "answer": 0,
+    "e": "A pH under 7.20 strongly suggests a complicated parapneumonic effusion, since bacterial metabolism and inflammatory cells consume glucose and produce lactate, lowering pH — this usually indicates a need for drainage."
+  },
+  {
+    "q": "Why does bacterial infection of the pleural space typically lower both pleural fluid pH and glucose simultaneously?",
+    "options": [
+      "Bacterial metabolism and inflammatory cells consume glucose and produce lactate",
+      "Bacteria selectively destroy glucose transporters on the pleura without affecting pH",
+      "Low glucose causes low pH through a renal compensatory mechanism",
+      "Antibiotics administered before sampling artificially lower both values"
+    ],
+    "answer": 0,
+    "e": "Active bacterial and inflammatory cell metabolism consumes glucose and generates lactate as a byproduct, producing the characteristic combination of low glucose and low pH seen in complicated infection."
+  },
+  {
+    "q": "A markedly elevated pleural fluid amylase should prompt consideration of which set of underlying processes?",
+    "options": [
+      "Esophageal rupture, pancreatitis, or pancreaticopleural fistula",
+      "Congestive heart failure or nephrotic syndrome",
+      "Tuberculosis or sarcoidosis",
+      "Rheumatoid pleurisy or lupus pleuritis"
+    ],
+    "answer": 0,
+    "e": "Elevated amylase points toward salivary-type amylase from esophageal rupture or pancreatic-type amylase from pancreatitis or a pancreaticopleural fistula — it is a context-driven test, not routine for every effusion."
+  },
+  {
+    "q": "Pleural fluid triglycerides above 110 mg/dL with chylomicrons present is diagnostic of:",
+    "options": [
+      "Chylothorax",
+      "Hemothorax",
+      "Empyema",
+      "Malignant effusion"
+    ],
+    "answer": 0,
+    "e": "Elevated triglycerides (>110 mg/dL) with chylomicrons in the pleural fluid is diagnostic of chylothorax, reflecting thoracic duct disruption or chyle leak."
+  },
+  {
+    "q": "A pleural fluid-to-serum creatinine ratio greater than 1, especially with a low pleural pH, should raise suspicion for which uncommon diagnosis?",
+    "options": [
+      "Urinothorax, from urinary tract obstruction or injury",
+      "Chylothorax, from thoracic duct injury",
+      "Hemothorax, from vascular trauma",
+      "Empyema, from bacterial superinfection"
+    ],
+    "answer": 0,
+    "e": "Urinothorax is a rare but important pattern in which a pleural/serum creatinine ratio >1 (with an accompanying low pH) suggests urine leaking into the pleural space from obstruction or injury."
+  },
+  {
+    "q": "A pleural fluid protein level above 4 g/dL is a clue that should raise suspicion for which condition, in the right clinical context?",
+    "options": [
+      "Tuberculous pleurisy",
+      "Congestive heart failure",
+      "Nephrotic syndrome",
+      "Cirrhosis"
+    ],
+    "answer": 0,
+    "e": "A markedly elevated protein (>4 g/dL) can be a clue toward TB pleurisy, distinct from the low-protein pattern of the classic transudative causes."
+  },
+  {
+    "q": "An elevated pleural fluid adenosine deaminase (ADA) level combined with lymphocytic predominance supports which diagnosis?",
+    "options": [
+      "Tuberculosis",
+      "Chylothorax",
+      "Urinothorax",
+      "Esophageal rupture"
+    ],
+    "answer": 0,
+    "e": "ADA above roughly 40 U/L together with lymphocytosis is a recognized supportive pattern for tuberculous pleural effusion."
+  },
+  {
+    "q": "An unusually low pleural fluid protein, under 1 g/dL, should prompt consideration of which less common causes?",
+    "options": [
+      "Dialysis-related or central venous catheter-related causes",
+      "Tuberculous pleurisy or malignancy",
+      "Empyema or complicated parapneumonic effusion",
+      "Chylothorax or hemothorax"
+    ],
+    "answer": 0,
+    "e": "An unusually low protein (<1 g/dL) is unusual and should prompt consideration of dialysis-related or CVC-related causes, rather than the typical infectious or malignant exudative causes."
+  },
+  {
+    "q": "What proportion of patients with true pleural infection have a positive pleural fluid culture, according to the lecture?",
+    "options": [
+      "Only approximately 60%",
+      "Nearly 100%",
+      "Less than 5%",
+      "Approximately 25%"
+    ],
+    "answer": 0,
+    "e": "Culture is positive in only about 60% of patients with pleural infection, meaning a negative culture does NOT exclude infection — an important clinical pearl."
+  },
+  {
+    "q": "Why is it clinically important that pleural fluid culture is only positive in about 60% of true pleural infections?",
+    "options": [
+      "A negative culture cannot be used to rule out pleural infection",
+      "It means culture should never be sent in suspected empyema",
+      "It proves that Gram stain is more sensitive than culture in all cases",
+      "It indicates that antibiotics must always be given before culture is drawn"
+    ],
+    "answer": 0,
+    "e": "Because roughly 40% of true infections are culture-negative, clinicians must not rely on a negative culture alone to exclude pleural infection — the clinical and biochemical picture still matters."
+  },
+  {
+    "q": "Progression from uncomplicated parapneumonic effusion to empyema follows which general sequence?",
+    "options": [
+      "Uncomplicated effusion → bacterial invasion (complicated effusion) → pus and loculations (empyema)",
+      "Empyema → complicated effusion → uncomplicated effusion, resolving spontaneously",
+      "Uncomplicated effusion converts directly to chylothorax without an intermediate stage",
+      "Complicated effusion always precedes pneumonia rather than following it"
+    ],
+    "answer": 0,
+    "e": "The staged progression is: uncomplicated parapneumonic effusion, which can become bacterially infected (complicated parapneumonic effusion), which can progress to frank pus with loculations (empyema)."
+  },
+  {
+    "q": "Which combination of findings is most consistent with frank empyema rather than a simple parapneumonic effusion?",
+    "options": [
+      "Fevers, elevated WBC, and sepsis with pus and loculations on imaging",
+      "Mild dyspnea only, with a clear, low-protein effusion",
+      "Bilateral effusions with normal inflammatory markers",
+      "Isolated eosinophilia with normal glucose and pH"
+    ],
+    "answer": 0,
+    "e": "Progression to empyema is marked by systemic signs (fevers, elevated WBC, sepsis) together with pus and loculated fluid, distinguishing it from an uncomplicated effusion."
+  },
+  {
+    "q": "What is the general treatment approach for any pleural effusion, regardless of specific cause?",
+    "options": [
+      "Treat the underlying cause and relieve symptoms",
+      "Perform pleurodesis on every patient regardless of etiology",
+      "Place a chest tube in every case as first-line therapy",
+      "Administer broad-spectrum antibiotics regardless of the fluid's biochemical profile"
+    ],
+    "answer": 0,
+    "e": "The general treatment approach is to address the underlying cause while relieving symptoms — specific interventions are then tailored to the etiology and severity."
+  },
+  {
+    "q": "When performing therapeutic thoracentesis to relieve dyspnea, what volume of fluid removal at one time is associated with a small risk of re-expansion pulmonary edema?",
+    "options": [
+      "More than 1.5 L",
+      "More than 100 mL",
+      "More than 10 L",
+      "Any volume greater than 50 mL"
+    ],
+    "answer": 0,
+    "e": "Removing more than 1.5 L of pleural fluid at one sitting carries a small risk of re-expansion pulmonary edema, so large-volume therapeutic taps should be approached cautiously."
+  },
+  {
+    "q": "Chest tube drainage (tube thoracostomy) is specifically indicated for which of the following?",
+    "options": [
+      "Empyema or hemothorax",
+      "An asymptomatic small transudative effusion from heart failure",
+      "Uncomplicated pleural effusion pending diagnostic workup",
+      "Isolated eosinophilic pleural effusion of unclear cause"
+    ],
+    "answer": 0,
+    "e": "Chest tube drainage is specifically indicated for empyema and hemothorax, conditions where fluid needs continuous, complete evacuation, unlike a simple diagnostic tap."
+  },
+  {
+    "q": "Pleurodesis is most appropriately used for which clinical scenario?",
+    "options": [
+      "Recurrent effusions, such as in malignancy",
+      "A first-time, small parapneumonic effusion",
+      "Acute hemothorax immediately after trauma",
+      "Initial diagnostic sampling of an undiagnosed effusion"
+    ],
+    "answer": 0,
+    "e": "Pleurodesis (chemical or mechanical) is used to prevent reaccumulation in recurrent effusions, particularly malignant ones, not as an initial diagnostic or first-time treatment step."
+  },
+  {
+    "q": "Which two surgical or advanced procedures are used respectively for a thickened, trapped pleura and for refractory empyema?",
+    "options": [
+      "Decortication for thickened pleura; VATS for refractory empyema",
+      "Thoracentesis for thickened pleura; pleurodesis for refractory empyema",
+      "Chest tube alone for both indications, without further escalation",
+      "Indwelling pleural catheter for thickened pleura; diuretics for refractory empyema"
+    ],
+    "answer": 0,
+    "e": "Decortication surgically removes thickened, restrictive pleura, while video-assisted thoracoscopic surgery (VATS) is used for refractory empyema not responding to drainage."
+  },
+  {
+    "q": "An indwelling pleural catheter is most specifically indicated for which situation?",
+    "options": [
+      "Recurrent malignant pleural effusions",
+      "A single episode of parapneumonic effusion",
+      "Acute respiratory failure requiring immediate large-volume drainage",
+      "Uncomplicated transudative effusion from cirrhosis"
+    ],
+    "answer": 0,
+    "e": "Indwelling pleural catheters allow ongoing outpatient drainage and are specifically indicated for recurrent malignant pleural effusions, unlike a one-time therapeutic tap."
+  },
+  {
+    "q": "Why is treating the underlying cause of a pleural effusion emphasized as essential, regardless of which drainage procedure is chosen?",
+    "options": [
+      "The effusion will likely reaccumulate if the underlying cause is not addressed",
+      "Drainage procedures are permanently curative on their own in all cases",
+      "Underlying cause treatment eliminates the need for any imaging follow-up",
+      "Drainage is contraindicated until the underlying cause is fully treated"
+    ],
+    "answer": 0,
+    "e": "A key clinical point emphasized in the lecture is that without treating the underlying cause, a drained effusion will likely reaccumulate — drainage alone is not a definitive fix."
+  },
+  {
+    "q": "Diuretics are the appropriate targeted treatment for which category of pleural effusion?",
+    "options": [
+      "Transudative effusions due to congestive heart failure",
+      "Exudative effusions due to tuberculosis",
+      "Empyema from bacterial superinfection",
+      "Malignant pleural effusion from lung cancer"
+    ],
+    "answer": 0,
+    "e": "Diuretics address the volume overload driving transudative CHF-related effusions; they have no role in treating exudative infectious, tuberculous, or malignant effusions."
+  },
+  {
+    "q": "In the recommended imaging sequence for suspected pleural effusion, which study is generally obtained first?",
+    "options": [
+      "Chest X-ray",
+      "CT pulmonary angiography",
+      "Thoracoscopy with pleural biopsy",
+      "Chest ultrasound-guided thoracentesis without prior imaging"
+    ],
+    "answer": 0,
+    "e": "Chest X-ray (PA view) is the standard initial imaging study, followed by ultrasound and, if needed, further sampling or cross-sectional imaging."
+  },
+  {
+    "q": "Which imaging modality is specifically noted as useful for guiding thoracentesis and characterizing pleural fluid?",
+    "options": [
+      "Chest ultrasound",
+      "Plain chest X-ray alone",
+      "Nuclear ventilation-perfusion scan",
+      "Barium swallow study"
+    ],
+    "answer": 0,
+    "e": "Ultrasound is specifically valuable for detecting and characterizing pleural fluid and for guiding thoracentesis in real time, improving safety and yield."
+  },
+  {
+    "q": "When is CT pulmonary angiography (CTPA) particularly relevant in the workup of a pleural effusion?",
+    "options": [
+      "When pulmonary embolism is part of the differential diagnosis",
+      "In every single case of pleural effusion, regardless of clinical suspicion",
+      "Only when the effusion is proven to be transudative",
+      "Only after thoracoscopy has already been performed"
+    ],
+    "answer": 0,
+    "e": "CTPA is specifically relevant when pulmonary embolism is suspected as a possible cause of the effusion, rather than being a routine test in every case."
+  },
+  {
+    "q": "If the underlying diagnosis remains uncertain after thoracentesis and cross-sectional imaging, which invasive procedure is next in the diagnostic pathway?",
+    "options": [
+      "Thoracoscopy with pleural biopsy",
+      "Repeat chest X-ray only",
+      "Empiric pleurodesis without further tissue diagnosis",
+      "Empiric broad-spectrum antibiotics without any biopsy"
+    ],
+    "answer": 0,
+    "e": "When diagnosis remains uncertain or direct pleural tissue assessment is needed (e.g., suspected malignancy), thoracoscopy with pleural biopsy is the next step in the pathway."
+  },
+  {
+    "q": "In a patient with an exudative effusion by Light's criteria, which additional pleural fluid studies should be obtained beyond protein and LDH?",
+    "options": [
+      "pH, glucose, WBC/differential, microbiology, and cytology",
+      "Only a repeat protein/LDH ratio 24 hours later",
+      "Serum albumin alone, with no further pleural fluid testing",
+      "A single random blood glucose only"
+    ],
+    "answer": 0,
+    "e": "Once an effusion is confirmed exudative, the diagnostic pathway calls for additional pleural fluid pH, glucose, cell counts/differential, microbiological studies, and cytology to pinpoint the cause."
+  },
+  {
+    "q": "A 68-year-old man with a 40-pack-year smoking history presents with progressive dyspnea and a large right-sided pleural effusion. Thoracentesis reveals a protein/serum protein ratio of 0.6 and LDH/serum LDH ratio of 0.7, with abnormal cytology showing malignant cells. Which mechanism most specifically explains why his effusion classifies as exudative rather than transudative?",
+    "options": [
+      "Increased vascular permeability and lymphatic obstruction from tumor infiltration",
+      "Decreased hydrostatic pressure from reduced cardiac output",
+      "Decreased oncotic pressure from tumor-related hypoalbuminemia alone",
+      "Increased oncotic pressure driving fluid into the pleural space"
+    ],
+    "answer": 0,
+    "e": "Malignant effusions are classically exudative because tumor-related inflammation increases capillary permeability while tumor infiltration can also impair lymphatic drainage — not a purely oncotic or hydrostatic process."
+  },
+  {
+    "q": "A 55-year-old woman with cirrhosis and known ascites develops a new, symptomatic right-sided pleural effusion without fever or leukocytosis. Thoracentesis shows protein/serum ratio 0.3 and LDH/serum ratio 0.4. What is the most likely diagnosis and its underlying route of formation?",
+    "options": [
+      "Hepatic hydrothorax, from movement of ascitic fluid through diaphragmatic defects into the pleural space",
+      "Empyema, from hematogenous seeding of the pleura by gut bacteria",
+      "Chylothorax, from cirrhosis-induced thoracic duct rupture",
+      "Malignant effusion, from an undiagnosed hepatocellular carcinoma"
+    ],
+    "answer": 0,
+    "e": "Hepatic hydrothorax classically presents as a transudative effusion (both ratios below Light's thresholds) in a cirrhotic patient, typically right-sided, arising from ascitic fluid tracking through small diaphragmatic defects."
+  },
+  {
+    "q": "A 45-year-old man presents 3 days after a difficult endoscopic esophageal dilation with fever, chest pain, and a new left pleural effusion. Pleural fluid amylase is markedly elevated with a salivary isoenzyme pattern. What is the most likely diagnosis?",
+    "options": [
+      "Esophageal perforation with pleural leakage of salivary contents",
+      "Acute pancreatitis with a sympathetic pleural effusion",
+      "Chylothorax from thoracic duct injury during the procedure",
+      "Empyema from an unrelated community-acquired pneumonia"
+    ],
+    "answer": 0,
+    "e": "A markedly elevated salivary-type amylase after an esophageal procedure strongly suggests esophageal perforation with leakage of salivary-amylase-rich contents into the pleural space, rather than a pancreatic or lymphatic process."
+  },
+  {
+    "q": "A 30-year-old woman develops a milky-white pleural effusion two weeks after thoracic surgery. Pleural fluid triglycerides are 250 mg/dL with chylomicrons present. What is the diagnosis and its cause?",
+    "options": [
+      "Chylothorax, from surgical injury to the thoracic duct",
+      "Empyema, from surgical site infection tracking into the pleura",
+      "Hemothorax, from a slow postoperative bleed",
+      "Urinothorax, from inadvertent ureteral injury during surgery"
+    ],
+    "answer": 0,
+    "e": "A milky effusion with triglycerides above 110 mg/dL and chylomicrons is diagnostic of chylothorax, here caused by iatrogenic thoracic duct injury during surgery."
+  },
+  {
+    "q": "A 60-year-old man with pneumonia has a parapneumonic effusion sampled by thoracentesis: pH 7.05, glucose 35 mg/dL, LDH 1400 IU/L, and neutrophil predominance. What is the most appropriate next step?",
+    "options": [
+      "Prompt chest tube drainage, since these findings define a complicated effusion needing evacuation",
+      "Observation alone with repeat imaging in one week",
+      "Discharge home on oral antibiotics without further intervention",
+      "Immediate pleurodesis to prevent recurrence"
+    ],
+    "answer": 0,
+    "e": "pH <7.20, glucose <60 mg/dL, and LDH >1000 IU/L together strongly indicate a complicated parapneumonic effusion/early empyema, which usually requires prompt drainage rather than observation or pleurodesis."
+  },
+  {
+    "q": "A 72-year-old woman with a history of breast cancer presents with recurrent, large, symptomatic pleural effusions requiring thoracentesis every 2 weeks despite ongoing chemotherapy. What is the most appropriate longer-term management strategy?",
+    "options": [
+      "An indwelling pleural catheter or pleurodesis to reduce recurrence",
+      "Repeated large-volume thoracentesis indefinitely with no other intervention",
+      "Diuretic therapy to reduce fluid reaccumulation",
+      "Empiric antituberculous therapy, given the recurrent nature of the effusion"
+    ],
+    "answer": 0,
+    "e": "For recurrent malignant effusions requiring frequent taps, an indwelling pleural catheter or pleurodesis is the appropriate strategy to reduce the need for repeated procedures, rather than diuretics (ineffective in malignant exudates) or antituberculous therapy (wrong etiology)."
+  },
+  {
+    "q": "A febrile patient with pneumonia has a pleural effusion sampled: neutrophils 62,000/µL, pH 7.10, glucose 28 mg/dL, and grossly purulent fluid on visual inspection, but the culture returns negative. How should this negative culture be interpreted?",
+    "options": [
+      "It does not exclude pleural infection, since culture is positive in only about 60% of true cases",
+      "It definitively rules out empyema, since culture is the gold standard",
+      "It suggests the fluid must be re-classified as transudative",
+      "It indicates the diagnosis is tuberculosis rather than bacterial empyema"
+    ],
+    "answer": 0,
+    "e": "Given the neutrophil count, low pH, low glucose, and grossly purulent appearance, this is empyema despite the negative culture — a reminder that roughly 40% of true infections are culture-negative."
+  },
+  {
+    "q": "A 50-year-old man on long-term hemodialysis develops a new pleural effusion. Thoracentesis reveals pleural fluid protein of 0.7 g/dL, well below the transudative threshold typically expected. What should this unusually low protein prompt the clinician to consider?",
+    "options": [
+      "A dialysis-related cause of the effusion",
+      "Tuberculous pleurisy, given the very low protein",
+      "Malignancy, since low protein is a hallmark of cancer-related effusions",
+      "Chylothorax, since dialysis patients are prone to thoracic duct injury"
+    ],
+    "answer": 0,
+    "e": "An unusually low pleural protein (<1 g/dL) in a dialysis patient should raise consideration of a dialysis-related cause, a specific and less common category distinct from the typical transudative/exudative causes."
+  },
+  {
+    "q": "A patient presents with a unilateral pleural effusion. Pleural fluid creatinine is measured and found to be higher than the simultaneous serum creatinine, with a pleural/serum creatinine ratio of 1.4, and pleural pH is low. What is the most likely diagnosis, and what clinical history should be sought?",
+    "options": [
+      "Urinothorax; ask about urinary tract obstruction or recent urologic injury",
+      "Chylothorax; ask about recent thoracic surgery",
+      "Empyema; ask about recent pneumonia",
+      "Hemothorax; ask about recent chest trauma"
+    ],
+    "answer": 0,
+    "e": "A pleural/serum creatinine ratio above 1 (with an accompanying low pH) is the defining pattern of urinothorax, usually linked to urinary tract obstruction or injury allowing urine to track into the pleural space."
+  },
+  {
+    "q": "A patient with longstanding rheumatoid arthritis develops a small, chronic, lymphocyte-predominant pleural effusion with low glucose. Aside from tuberculosis and malignancy, which condition should also be considered given her history?",
+    "options": [
+      "Rheumatoid pleurisy",
+      "Nephrotic syndrome",
+      "Hepatic hydrothorax",
+      "Urinothorax"
+    ],
+    "answer": 0,
+    "e": "Rheumatoid pleurisy is a recognized cause of chronic, lymphocyte-predominant, often low-glucose exudative effusions in patients with rheumatoid arthritis — distinct from the transudative causes listed as distractors."
+  },
+  {
+    "q": "A patient with a large, symptomatic effusion undergoes therapeutic thoracentesis. During removal of the 4th liter of fluid in one sitting, she develops sudden cough and worsening dyspnea. What complication should be suspected?",
+    "options": [
+      "Re-expansion pulmonary edema, from removing more than 1.5 L at once",
+      "Anaphylaxis to the local anesthetic used for the procedure",
+      "A new contralateral pneumothorax unrelated to the procedure",
+      "Acute pulmonary embolism coincidentally occurring during the tap"
+    ],
+    "answer": 0,
+    "e": "Removing more than 1.5 L of pleural fluid in one sitting carries a recognized risk of re-expansion pulmonary edema, which can present as sudden cough and worsening dyspnea during or after a large-volume tap."
+  },
+  {
+    "q": "A 65-year-old man with a parapneumonic effusion has pleural fluid eosinophilia of 15%. Which statement about interpreting this finding is most accurate?",
+    "options": [
+      "Eosinophilia broadens the differential rather than confirming one diagnosis, and could reflect blood or air in the pleural space among other causes",
+      "It is pathognomonic for a parasitic infection and no other workup is needed",
+      "It rules out any infectious or malignant cause of the effusion",
+      "It confirms tuberculosis without need for further testing"
+    ],
+    "answer": 0,
+    "e": "Pleural eosinophilia has a broad differential — including blood or air in the pleural space, parasitic infection, pulmonary infarction, drug reaction, and TB — and does not by itself confirm a single diagnosis."
+  },
+  {
+    "q": "A patient with a known malignancy has an exudative pleural effusion, but initial cytology is negative for malignant cells. What is the most appropriate next step if malignancy remains strongly suspected?",
+    "options": [
+      "Proceed to thoracoscopy with pleural biopsy for direct tissue diagnosis",
+      "Conclude malignancy is excluded and pursue an alternative diagnosis exclusively",
+      "Repeat only a chest X-ray and observe without further sampling",
+      "Start empiric antituberculous therapy as the next diagnostic step"
+    ],
+    "answer": 0,
+    "e": "A single negative cytology does not exclude malignancy; when suspicion remains high, thoracoscopy with pleural biopsy provides direct tissue sampling and is the appropriate next step, not antituberculous therapy or exclusion of cancer."
+  }
+];
+</script>
+
+<script>
+/* ===== Quiz engine ===== */
+(function(){
+  const bank = QUESTIONS.map(q=>({...q}));
+  const quizEl = document.getElementById('quiz');
+  const totalEl = document.getElementById('total');
+  const answeredEl = document.getElementById('answered');
+  const scorepillEl = document.getElementById('scorepill');
+  const barfill = document.getElementById('barfill');
+  const submitBtn = document.getElementById('submitBtn');
+  const submitRow = document.getElementById('submitRow');
+  const hint = document.getElementById('hint');
+  const resultEl = document.getElementById('result');
+  const LETTERS = ['A','B','C','D','E','F'];
+  const PASS = 70;
+
+  let state = [];
+
+  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+  function build(){
+    quizEl.innerHTML='';
+    state = bank.map(()=>({answered:false,correct:false}));
+    totalEl.textContent = bank.length;
+
+    bank.forEach((item,qi)=>{
+      // shuffle options, track correct index
+      const order = shuffle(item.options.map((t,idx)=>({t,idx})));
+      const correctPos = order.findIndex(o=>o.idx===item.answer);
+
+      const card = document.createElement('div');
+      card.className='q';
+      card.id='q'+qi;
+
+      const head = document.createElement('div');
+      head.className='q-head';
+      head.innerHTML = `<span class="q-num">Q${String(qi+1).padStart(2,'0')}</span><span class="q-text"></span>`;
+      head.querySelector('.q-text').textContent = item.q;
+      card.appendChild(head);
+
+      const opts = document.createElement('div');
+      opts.className='opts';
+      order.forEach((o,pos)=>{
+        const b = document.createElement('button');
+        b.className='opt';
+        b.innerHTML = `<span class="tag">${LETTERS[pos]}</span><span class="txt"></span><span class="mark"></span>`;
+        b.querySelector('.txt').textContent = o.t;
+        b.addEventListener('click',()=>choose(qi,pos,correctPos,opts,exp));
+        opts.appendChild(b);
+      });
+      card.appendChild(opts);
+
+      const exp = document.createElement('div');
+      exp.className='explain';
+      exp.innerHTML = `<b>Why:</b> ${item.e}`;
+      card.appendChild(exp);
+
+      quizEl.appendChild(card);
+    });
+    update();
+  }
+
+  function choose(qi,pos,correctPos,optsEl,expEl){
+    if(state[qi].answered) return;
+    state[qi].answered=true;
+    state[qi].correct = (pos===correctPos);
+    const buttons=[...optsEl.children];
+    buttons.forEach((b,i)=>{
+      b.disabled=true;
+      if(i===correctPos){b.classList.add('correct');b.querySelector('.mark').textContent='✓';}
+      if(i===pos && pos!==correctPos){b.classList.add('wrong');b.querySelector('.mark').textContent='✗';}
+    });
+    expEl.classList.add('show');
+    update();
+  }
+
+  function update(){
+    const answered = state.filter(s=>s.answered).length;
+    const correct = state.filter(s=>s.correct).length;
+    answeredEl.textContent = answered;
+    scorepillEl.textContent = correct+' correct';
+    barfill.style.width = (answered/bank.length*100)+'%';
+    const done = answered===bank.length;
+    submitBtn.disabled = !done;
+    hint.textContent = done ? 'All answered — lock in your score' : (bank.length-answered)+' left';
+  }
+
+  submitBtn.addEventListener('click',()=>{
+    const correct = state.filter(s=>s.correct).length;
+    const pct = Math.round(correct/bank.length*100);
+    const pass = pct>=PASS;
+    resultEl.className='result show '+(pass?'pass':'fail');
+    document.getElementById('verdict').textContent = pass?'Pass':'Keep reviewing';
+    document.getElementById('bigscore').textContent = pct+'%';
+    document.getElementById('resultDetail').textContent =
+      `${correct} of ${bank.length} correct · passing mark is ${PASS}%`;
+    submitRow.style.display='none';
+    resultEl.scrollIntoView({behavior:'smooth',block:'center'});
+  });
+
+  window.retry=function(){
+    resultEl.className='result';
+    submitRow.style.display='';
+    build();
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+
+  build();
+})();
+</script>
+</body>
+</html>

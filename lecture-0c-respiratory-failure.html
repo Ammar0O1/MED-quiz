@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Respiratory Failure — Quiz</title>
+<style>
+  :root{
+    --ink:#0a0e14; --ink-2:#0f1620; --panel:#121b28; --panel-2:#16212f;
+    --line:#1f2d3f; --line-2:#293a50;
+    --text:#e6edf5; --muted:#8598ad; --faint:#5a6b82;
+    --accent:#c084fc; --accent-2:#a855f7; --accent-soft:rgba(192,132,252,0.12);
+    --good:#34d399; --good-soft:rgba(52,211,153,0.14); --good-line:rgba(52,211,153,0.5);
+    --bad:#f87171; --bad-soft:rgba(248,113,113,0.13); --bad-line:rgba(248,113,113,0.5);
+    --gold:#fbbf24;
+    --mono:'SF Mono',ui-monospace,'Cascadia Code','JetBrains Mono',Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;background:var(--ink);color:var(--text);font-family:var(--sans);
+    line-height:1.55;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background-image:radial-gradient(1200px 600px at 80% -10%,rgba(56,189,248,0.06),transparent 60%),radial-gradient(900px 500px at -10% 110%,rgba(56,189,248,0.05),transparent 60%);
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:22px 18px 96px;}
+
+  /* top bar */
+  .top{display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap;}
+  .back{
+    display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--muted);
+    font-family:var(--mono);font-size:13px;padding:9px 14px;border:1px solid var(--line);
+    border-radius:11px;background:var(--panel);transition:.15s;
+  }
+  .back:active{background:var(--panel-2);}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--accent);
+    text-transform:uppercase;border:1px solid var(--line-2);padding:6px 12px;border-radius:20px;background:var(--accent-soft);}
+
+  h1{font-family:var(--mono);font-size:clamp(26px,6vw,38px);font-weight:700;letter-spacing:-.01em;
+    margin:6px 0 6px;line-height:1.1;}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 22px;max-width:60ch;}
+
+  /* progress */
+  .progress-wrap{position:sticky;top:8px;z-index:20;margin-bottom:26px;}
+  .progress-card{background:rgba(15,22,32,0.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid var(--line);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:14px;}
+  .progress-meta{font-family:var(--mono);font-size:12.5px;color:var(--muted);white-space:nowrap;}
+  .progress-meta b{color:var(--text);}
+  .bar{flex:1;height:7px;background:var(--ink-2);border-radius:99px;overflow:hidden;border:1px solid var(--line);}
+  .bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent-2),var(--accent));
+    border-radius:99px;transition:width .35s cubic-bezier(.4,0,.2,1);}
+  .score-pill{font-family:var(--mono);font-size:12.5px;color:var(--good);white-space:nowrap;}
+
+  /* question card */
+  .q{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 18px;margin-bottom:16px;
+    scroll-margin-top:90px;}
+  .q-head{display:flex;gap:12px;align-items:baseline;margin-bottom:14px;}
+  .q-num{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700;flex:none;
+    border:1px solid var(--line-2);background:var(--accent-soft);border-radius:8px;padding:3px 9px;min-width:44px;text-align:center;}
+  .q-text{font-size:16.5px;font-weight:600;line-height:1.5;letter-spacing:-.005em;}
+  .opts{display:flex;flex-direction:column;gap:9px;margin-top:4px;}
+  .opt{
+    display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;
+    background:var(--panel-2);border:1px solid var(--line);border-radius:12px;
+    padding:14px 15px;color:var(--text);font-size:15.5px;font-family:inherit;line-height:1.45;
+    cursor:pointer;transition:border-color .15s,background .15s,transform .06s;
+  }
+  .opt:active{transform:scale(.994);}
+  @media(hover:hover){.opt:not(:disabled):hover{border-color:var(--accent-2);background:var(--panel);}}
+  .opt .tag{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--muted);flex:none;
+    width:24px;height:24px;border-radius:7px;border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .opt .txt{flex:1;}
+  .opt:disabled{cursor:default;}
+  .opt.correct{background:var(--good-soft);border-color:var(--good-line);}
+  .opt.correct .tag{color:var(--good);border-color:var(--good-line);background:var(--good-soft);}
+  .opt.wrong{background:var(--bad-soft);border-color:var(--bad-line);}
+  .opt.wrong .tag{color:var(--bad);border-color:var(--bad-line);background:var(--bad-soft);}
+  .opt .mark{margin-left:auto;font-family:var(--mono);font-size:13px;font-weight:700;flex:none;align-self:center;}
+  .opt.correct .mark{color:var(--good);}
+  .opt.wrong .mark{color:var(--bad);}
+
+  .explain{margin-top:13px;border-left:3px solid var(--accent-2);background:var(--ink-2);
+    border-radius:0 10px 10px 0;padding:12px 15px;font-size:14.5px;color:var(--muted);display:none;}
+  .explain.show{display:block;animation:fade .25s ease;}
+  .explain b{color:var(--text);font-weight:600;}
+  @keyframes fade{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+
+  /* result */
+  .result{background:linear-gradient(160deg,var(--panel),var(--ink-2));border:1px solid var(--line-2);
+    border-radius:18px;padding:30px 22px;text-align:center;margin-top:8px;display:none;}
+  .result.show{display:block;animation:fade .3s ease;}
+  .result .verdict{font-family:var(--mono);font-size:14px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px;}
+  .result.pass .verdict{color:var(--good);}
+  .result.fail .verdict{color:var(--gold);}
+  .result .big{font-family:var(--mono);font-size:56px;font-weight:700;line-height:1;margin:6px 0;}
+  .result .detail{color:var(--muted);font-size:15px;margin-bottom:20px;}
+  .result .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .btn{font-family:var(--mono);font-size:14px;padding:12px 20px;border-radius:11px;border:1px solid var(--line-2);
+    background:var(--panel-2);color:var(--text);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:.15s;}
+  .btn:active{transform:scale(.97);}
+  .btn.primary{background:var(--accent-2);border-color:var(--accent);color:#04121c;font-weight:700;}
+
+  .submit-row{margin-top:8px;text-align:center;}
+  .submit-btn{font-family:var(--mono);font-size:15px;font-weight:700;padding:15px 30px;border-radius:13px;
+    border:1px solid var(--accent);background:var(--accent-2);color:#04121c;cursor:pointer;transition:.15s;width:100%;max-width:340px;}
+  .submit-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .submit-btn:not(:disabled):active{transform:scale(.98);}
+  .hint{font-family:var(--mono);font-size:12.5px;color:var(--faint);margin-top:12px;}
+
+  @media(min-width:768px){
+    .wrap{padding:34px 26px 110px;}
+    .q{padding:24px 24px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="index.html">&larr; All lectures</a>
+    <span class="eyebrow">Respiratory Module · 🫁</span>
+  </div>
+  <h1>Respiratory Failure</h1>
+  <p class="sub">Type 1 vs Type 2, pathophysiology of hypoxemia, the diagnostic algorithm, ventilator management, and hard clinical vignettes. Tap an answer to lock it in and see instant feedback.</p>
+
+  <div class="progress-wrap">
+    <div class="progress-card">
+      <span class="progress-meta"><b id="answered">0</b>/<span id="total">0</span> answered</span>
+      <div class="bar"><i id="barfill"></i></div>
+      <span class="score-pill" id="scorepill">0 correct</span>
+    </div>
+  </div>
+
+  <div id="quiz"></div>
+
+  <div class="submit-row" id="submitRow">
+    <button class="submit-btn" id="submitBtn" disabled>Finish &amp; see score</button>
+    <div class="hint" id="hint">Answer all questions to finish</div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="verdict" id="verdict"></div>
+    <div class="big" id="bigscore"></div>
+    <div class="detail" id="resultDetail"></div>
+    <div class="actions">
+      <button class="btn primary" onclick="retry()">Try again</button>
+      <a class="btn" href="index.html">Back to lectures</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== Question bank =====
+   answer = index of correct option. Options are shuffled at render so position carries no signal. */
+const QUESTIONS = [
+  {
+    "q": "A patient's ABG shows PaO2 55 mmHg. By the definition used in this lecture, this qualifies as which condition?",
+    "options": [
+      "Hypoxemic respiratory failure",
+      "Hypercapnic respiratory failure",
+      "Respiratory arrest",
+      "Respiratory distress"
+    ],
+    "answer": 0,
+    "e": "Hypoxemic (Type 1) respiratory failure is defined as PaO2 < 60 mmHg (8 kPa), which this value meets."
+  },
+  {
+    "q": "A patient's ABG shows PaCO2 of 55 mmHg. By the definition used in this lecture, this qualifies as which condition?",
+    "options": [
+      "Hypercapnic respiratory failure",
+      "Hypoxemic respiratory failure",
+      "Apnea",
+      "Respiratory distress"
+    ],
+    "answer": 0,
+    "e": "Hypercapnic (Type 2) respiratory failure is defined as PaCO2 > 50 mmHg (6.5 kPa), which this value exceeds."
+  },
+  {
+    "q": "Can hypoxemic and hypercapnic respiratory failure occur simultaneously in the same patient?",
+    "options": [
+      "Yes, the two can occur together",
+      "No, they are always mutually exclusive",
+      "Only in pediatric patients",
+      "Only if the patient is on mechanical ventilation"
+    ],
+    "answer": 0,
+    "e": "The lecture explicitly states hypoxemic and hypercapnic respiratory failure can occur together — they are not mutually exclusive categories."
+  },
+  {
+    "q": "A patient has a pulse but has completely stopped breathing. What is the correct terminology for this state?",
+    "options": [
+      "Respiratory arrest",
+      "Apnea",
+      "Respiratory distress",
+      "Type 2 respiratory failure"
+    ],
+    "answer": 0,
+    "e": "Respiratory arrest specifically refers to complete cessation of breathing in a patient who still has a pulse, distinct from apnea (a measured pause) or distress (labored breathing)."
+  },
+  {
+    "q": "How is apnea specifically defined by duration?",
+    "options": [
+      "Complete cessation of breathing for more than 10 seconds",
+      "Any pause in breathing lasting more than 1 second",
+      "Cessation of breathing for more than 60 seconds only",
+      "A reduction in respiratory rate below 12/min"
+    ],
+    "answer": 0,
+    "e": "Apnea is defined as a measured, complete cessation of airflow for greater than 10 seconds."
+  },
+  {
+    "q": "A patient presenting with tachypnea, accessory muscle use, nasal flaring, and inability to speak in full sentences — but who is still actively breathing — is best described as being in:",
+    "options": [
+      "Respiratory distress",
+      "Respiratory arrest",
+      "Apnea",
+      "Chronic hypercapnic failure"
+    ],
+    "answer": 0,
+    "e": "Respiratory distress describes a patient actively struggling to breathe (increased work of breathing), as opposed to arrest or apnea, which describe an absence of breathing."
+  },
+  {
+    "q": "In a deteriorating patient, what is the typical clinical progression described in the lecture?",
+    "options": [
+      "Respiratory distress → apnea → respiratory arrest → cardiac arrest",
+      "Respiratory arrest → distress → apnea → recovery",
+      "Apnea → cardiac arrest → respiratory distress",
+      "Cor pulmonale → distress → hypercapnia → arrest"
+    ],
+    "answer": 0,
+    "e": "The described progression is distress (from fatiguing effort) leading to apneas, then complete respiratory arrest, followed shortly after by cardiac arrest if untreated."
+  },
+  {
+    "q": "Which combination of ABG findings defines Type 1 (hypoxemic) respiratory failure?",
+    "options": [
+      "PaO2 decreased, PaCO2 normal or decreased",
+      "PaO2 decreased, PaCO2 increased",
+      "PaO2 normal, PaCO2 increased",
+      "PaO2 increased, PaCO2 decreased"
+    ],
+    "answer": 0,
+    "e": "Type 1 respiratory failure is characterized by hypoxemia with normal or low (not elevated) PaCO2 — the defect is primarily in oxygenation."
+  },
+  {
+    "q": "Which combination of ABG findings defines Type 2 (hypercapnic) respiratory failure?",
+    "options": [
+      "PaCO2 increased, PaO2 normal or decreased",
+      "PaCO2 decreased, PaO2 increased",
+      "PaCO2 normal, PaO2 decreased",
+      "PaCO2 increased, PaO2 always normal"
+    ],
+    "answer": 0,
+    "e": "Type 2 respiratory failure is defined by hypercapnia, with PaO2 that may be normal or decreased — the defect is primarily in ventilation."
+  },
+  {
+    "q": "What is the key distinguishing feature of the alveolar-arterial (A-a) gradient between Type 1 and Type 2 respiratory failure?",
+    "options": [
+      "Type 1 typically has an increased A-a gradient; Type 2 typically has a normal A-a gradient",
+      "Type 1 has a normal A-a gradient; Type 2 has an increased A-a gradient",
+      "Both types always have an increased A-a gradient",
+      "Neither type shows any change in A-a gradient"
+    ],
+    "answer": 0,
+    "e": "Type 1 failure (V/Q mismatch, shunt, diffusion defect) increases the A-a gradient, whereas pure hypoventilation causing Type 2 failure keeps the A-a gradient normal."
+  },
+  {
+    "q": "A 68-year-old with severe COPD exacerbation has an ABG showing PaO2 50 mmHg, PaCO2 68 mmHg, and pH 7.28. What type of respiratory failure is this, and what does the low pH suggest about its timing?",
+    "options": [
+      "Acute Type 2 respiratory failure, since there has been insufficient time for renal compensation",
+      "Chronic Type 2 respiratory failure, since the kidneys have already compensated",
+      "Acute Type 1 respiratory failure, unrelated to CO2",
+      "Chronic Type 1 respiratory failure with full metabolic compensation"
+    ],
+    "answer": 0,
+    "e": "A markedly low pH (7.28) with elevated CO2 indicates an acute process — insufficient time has passed for renal bicarbonate compensation, which would otherwise normalize pH toward baseline."
+  },
+  {
+    "q": "A patient with long-standing hypercapnic COPD has a PaCO2 of 65 mmHg but a pH of only 7.34. What does this near-normal pH indicate about the timeframe of his hypercapnia?",
+    "options": [
+      "It reflects chronic hypercapnia, with renal compensation raising bicarbonate over time",
+      "It reflects a brand-new acute process with no compensation",
+      "It indicates the ABG sample was contaminated with venous blood",
+      "It suggests concurrent metabolic alkalosis unrelated to his lungs"
+    ],
+    "answer": 0,
+    "e": "In chronic hypercapnic respiratory failure, renal compensation increases bicarbonate over days, keeping pH only slightly decreased despite a markedly elevated PaCO2."
+  },
+  {
+    "q": "Which physical exam and lab findings are classic markers of long-standing (chronic) hypoxemia?",
+    "options": [
+      "Polycythemia and cor pulmonale",
+      "Acute confusion and hypotension only",
+      "Isolated leukocytosis",
+      "Isolated thrombocytosis"
+    ],
+    "answer": 0,
+    "e": "Chronic hypoxemia triggers increased erythropoietin production (causing secondary polycythemia) and can lead to pulmonary hypertension with right heart strain (cor pulmonale)."
+  },
+  {
+    "q": "According to the lecture, which four requirements must be met to maintain adequate oxygenation?",
+    "options": [
+      "Normal FiO2, adequate ventilation, normal alveolar diffusion, sufficient pulmonary blood flow",
+      "Normal hemoglobin, normal cardiac output, normal renal function, normal hepatic function",
+      "Normal chest wall compliance, normal airway caliber, normal pH, normal temperature",
+      "Normal heart rate, normal blood pressure, normal glucose, normal electrolytes"
+    ],
+    "answer": 0,
+    "e": "Adequate oxygenation requires normal inspired oxygen content, adequate ventilation, normal alveolar diffusion, and sufficient pulmonary blood flow — a defect in any one can cause Type 1 failure."
+  },
+  {
+    "q": "High-altitude illness causes hypoxemia primarily through which mechanism?",
+    "options": [
+      "Decreased FiO2 lowering alveolar oxygen tension",
+      "A pulmonary right-to-left shunt",
+      "Thickening of the alveolar-capillary membrane",
+      "V/Q mismatch from regional hypoperfusion"
+    ],
+    "answer": 0,
+    "e": "At altitude, reduced atmospheric pressure lowers the partial pressure of inspired oxygen (PiO2), reducing alveolar oxygen tension (PAO2) and impairing diffusion into blood."
+  },
+  {
+    "q": "A patient with idiopathic pulmonary fibrosis has hypoxemia that worsens markedly during exercise but is only mild at rest. What pathophysiologic mechanism best explains this pattern?",
+    "options": [
+      "Impaired alveolar diffusion, worsened by reduced transit time as blood flows faster through capillaries during exertion",
+      "A fixed right-to-left shunt unrelated to exercise",
+      "Hypoventilation from respiratory muscle fatigue only during exercise",
+      "High-altitude-type reduction in inspired oxygen during exertion"
+    ],
+    "answer": 0,
+    "e": "In diffusion-limited disease, resting gas exchange may be adequate, but the shortened capillary transit time during exercise doesn't allow enough time for oxygen to diffuse across a thickened membrane, worsening hypoxemia."
+  },
+  {
+    "q": "What is the defining feature that distinguishes shunt physiology from V/Q mismatch as a cause of hypoxemia?",
+    "options": [
+      "Shunt hypoxemia does not correct with supplemental oxygen, whereas V/Q mismatch does",
+      "Shunt hypoxemia always corrects fully with supplemental oxygen",
+      "V/Q mismatch never responds to any oxygen therapy",
+      "Both are equally responsive to 100% oxygen"
+    ],
+    "answer": 0,
+    "e": "In a true shunt, blood completely bypasses ventilated alveoli, so it cannot pick up the extra oxygen — supplemental O2 fails to correct hypoxemia. V/Q mismatch (some ventilation present) generally improves with supplemental oxygen."
+  },
+  {
+    "q": "A patient's hypoxemia fails to correct despite administration of 100% oxygen. According to the diagnostic algorithm, what should be obtained next?",
+    "options": [
+      "An echocardiogram, to evaluate for a true shunt",
+      "A repeat ABG in 30 minutes with no further workup",
+      "Spirometry to assess for obstructive lung disease",
+      "Serum electrolytes to assess for an anion gap"
+    ],
+    "answer": 0,
+    "e": "Failure to correct with 100% oxygen indicates a true shunt (pulmonary or intracardiac); the algorithm directs the clinician to obtain an echocardiogram to evaluate for this."
+  },
+  {
+    "q": "A neonate is diagnosed with a large ventricular septal defect causing hypoxemia unresponsive to supplemental oxygen. What type of shunt physiology does this represent?",
+    "options": [
+      "Intracardiac right-to-left shunt",
+      "Pulmonary right-to-left shunt",
+      "V/Q mismatch from atelectasis",
+      "Diffusion limitation from a thickened membrane"
+    ],
+    "answer": 0,
+    "e": "A VSD causing right-to-left flow is an intracardiac shunt — blood bypasses the lungs entirely, entering systemic circulation without ever being oxygenated, hence its unresponsiveness to supplemental O2."
+  },
+  {
+    "q": "Tension pneumothorax causes hypoxemia primarily through which mechanism?",
+    "options": [
+      "Increasing intrathoracic pressure and exacerbating shunting in the affected lung",
+      "Directly lowering the FiO2 of inspired air",
+      "Causing a diffusion defect across the alveolar membrane",
+      "Producing a fixed intracardiac shunt"
+    ],
+    "answer": 0,
+    "e": "Tension pneumothorax reduces ventilation in the affected lung while perfusion may continue, worsening pulmonary shunt physiology and increasing intrathoracic pressure."
+  },
+  {
+    "q": "In carbon monoxide poisoning, hypoxemia (tissue hypoxia) occurs despite which unusual feature?",
+    "options": [
+      "The abnormality lies in oxygen transport/carriage, not in the lungs themselves",
+      "A markedly elevated A-a gradient from alveolar disease",
+      "Severe V/Q mismatch from bronchospasm",
+      "A pulmonary right-to-left shunt from CO-induced vasculopathy"
+    ],
+    "answer": 0,
+    "e": "CO poisoning impairs oxygen transport by binding hemoglobin preferentially, so the lungs and gas exchange are structurally normal — the defect is in oxygen carriage, not ventilation or diffusion."
+  },
+  {
+    "q": "Which of the following is classified as a cause of Type 1 respiratory failure via V/Q mismatch, rather than via a true shunt?",
+    "options": [
+      "Severe pneumonia with regional hypoventilation but preserved perfusion",
+      "ARDS with diffuse alveolar collapse",
+      "Eisenmenger syndrome",
+      "A large ventricular septal defect"
+    ],
+    "answer": 0,
+    "e": "Pneumonia classically causes low V/Q (perfused but poorly ventilated alveoli) rather than a complete shunt; ARDS, Eisenmenger's, and VSD are associated with true shunt physiology when severe."
+  },
+  {
+    "q": "Pulmonary embolism causes hypoxemia through which specific V/Q abnormality?",
+    "options": [
+      "High V/Q, with ventilated but poorly perfused alveoli",
+      "Low V/Q, with perfused but poorly ventilated alveoli",
+      "A fixed anatomical right-to-left shunt",
+      "Decreased FiO2 in the affected lung segment"
+    ],
+    "answer": 0,
+    "e": "PE obstructs blood flow to ventilated alveoli, creating a high V/Q ratio (ventilation without matching perfusion) — the opposite pattern from pneumonia's low V/Q."
+  },
+  {
+    "q": "Which of the following is specifically noted as an exception — usually classified as Type 2 rather than Type 1 respiratory failure when severe?",
+    "options": [
+      "Severe asthma exacerbation",
+      "Pulmonary embolism",
+      "Pneumothorax",
+      "Pulmonary fibrosis"
+    ],
+    "answer": 0,
+    "e": "The lecture specifically notes that while asthma often causes Type 1 failure, a severe exacerbation causes Type 2 respiratory failure due to significant hypoventilation from fatigue and airway obstruction."
+  },
+  {
+    "q": "Cyanotic congenital heart disease causes Type 1 respiratory failure through which mechanism?",
+    "options": [
+      "An intracardiac right-to-left shunt bypassing the lungs",
+      "Decreased FiO2 delivery to the alveoli",
+      "Increased alveolar dead space from fibrosis",
+      "Hypoventilation from chest wall restriction"
+    ],
+    "answer": 0,
+    "e": "Cyanotic congenital heart disease (e.g., Eisenmenger physiology) causes deoxygenated blood to bypass the lungs via an intracardiac right-to-left shunt."
+  },
+  {
+    "q": "A patient develops hypercapnic respiratory failure after a heroin overdose. What is the primary mechanism?",
+    "options": [
+      "CNS depression reducing respiratory drive and rate",
+      "Direct airway obstruction from bronchospasm",
+      "Respiratory muscle weakness from a myopathy",
+      "Decreased chest wall compliance from opioid-induced rigidity"
+    ],
+    "answer": 0,
+    "e": "Opioids cause CNS depression, suppressing the brainstem respiratory drive and reducing respiratory rate — a classic 'central' cause of hypoventilation-induced Type 2 failure."
+  },
+  {
+    "q": "A patient with Guillain-Barré syndrome develops rising PaCO2 and falling vital capacity. What is the mechanism of her respiratory failure?",
+    "options": [
+      "Respiratory muscle weakness impairing effective ventilation",
+      "CNS depression from cerebral demyelination",
+      "Upper airway obstruction from laryngeal edema",
+      "Decreased chest wall compliance from rib fractures"
+    ],
+    "answer": 0,
+    "e": "GBS causes ascending neuromuscular weakness that can involve the respiratory muscles, impairing the ability to generate adequate tidal volume and leading to hypoventilation."
+  },
+  {
+    "q": "Circumferential chest and abdominal burns can precipitate Type 2 respiratory failure through which mechanism?",
+    "options": [
+      "Decreased chest wall compliance restricting adequate ventilation",
+      "Direct destruction of alveolar-capillary membranes",
+      "CNS depression from systemic burn toxins",
+      "A pulmonary right-to-left shunt from burn-induced vasculitis"
+    ],
+    "answer": 0,
+    "e": "Circumferential burns create a rigid eschar that mechanically restricts chest wall expansion, reducing tidal volume and compliance, leading to hypoventilation."
+  },
+  {
+    "q": "Which electrolyte disturbance is specifically noted to cause respiratory muscle weakness contributing to hypercapnic failure?",
+    "options": [
+      "Hypokalemia",
+      "Hyperkalemia",
+      "Hypercalcemia",
+      "Hypomagnesemia"
+    ],
+    "answer": 0,
+    "e": "Hypokalemia is specifically noted to cause respiratory muscle weakness, while hyponatremia is noted to cause CNS depression — both pathways toward hypoventilation."
+  },
+  {
+    "q": "Myasthenia gravis causes hypercapnic respiratory failure via which category of mechanism?",
+    "options": [
+      "Respiratory muscle weakness",
+      "Upper airway obstruction",
+      "CNS depression",
+      "Decreased chest wall compliance"
+    ],
+    "answer": 0,
+    "e": "Myasthenia gravis impairs neuromuscular transmission at the respiratory muscles themselves, distinct from CNS-mediated or mechanical/obstructive causes."
+  },
+  {
+    "q": "Obesity hypoventilation syndrome contributes to Type 2 respiratory failure primarily through which category of mechanism?",
+    "options": [
+      "Decreased chest wall compliance",
+      "Upper airway obstruction exclusively",
+      "CNS depression from sedative use",
+      "A pulmonary right-to-left shunt"
+    ],
+    "answer": 0,
+    "e": "Obesity hypoventilation syndrome is grouped under decreased chest wall compliance, impairing effective ventilation, though upper airway issues can coexist in OSA."
+  },
+  {
+    "q": "According to the diagnostic algorithm, what O2 saturation threshold prompts obtaining an arterial blood gas?",
+    "options": [
+      "SpO2 less than 90%",
+      "SpO2 less than 99%",
+      "SpO2 less than 70%",
+      "Any SpO2 below 100% regardless of symptoms"
+    ],
+    "answer": 0,
+    "e": "The algorithm triggers ABG testing when SpO2 falls below 90% in a patient with increased respiratory rate and work of breathing."
+  },
+  {
+    "q": "On the diagnostic algorithm, a normal A-a gradient together with an elevated PCO2 points toward which underlying process?",
+    "options": [
+      "Hypoventilation",
+      "V/Q mismatch",
+      "Diffusion impairment",
+      "True intracardiac shunt"
+    ],
+    "answer": 0,
+    "e": "A normal A-a gradient with elevated PCO2 is the classic signature of pure hypoventilation, since the lungs themselves are functioning normally — the problem is inadequate ventilation."
+  },
+  {
+    "q": "On the diagnostic algorithm, hypoxemia that is present only with exertion, with an increased A-a gradient or normal PCO2, suggests which mechanism?",
+    "options": [
+      "Impaired diffusion",
+      "True shunt",
+      "Pure hypoventilation",
+      "Decreased FiO2"
+    ],
+    "answer": 0,
+    "e": "Diffusion impairment classically causes hypoxemia that is most apparent with exertion (due to reduced capillary transit time), consistent with an elevated A-a gradient."
+  },
+  {
+    "q": "A patient's ABG shows an increased A-a gradient. After administering 100% oxygen, hypoxemia corrects. What does this indicate?",
+    "options": [
+      "V/Q mismatch",
+      "A true shunt",
+      "Pure hypoventilation",
+      "Normal physiology requiring no further workup"
+    ],
+    "answer": 0,
+    "e": "When hypoxemia corrects with 100% oxygen, this points to V/Q mismatch (some ventilation is present, allowing supplemental O2 to help) rather than a true shunt, which would not correct."
+  },
+  {
+    "q": "What is the correct order of the initial steps in the general approach to a patient in respiratory failure, as outlined in the lecture?",
+    "options": [
+      "ABCDE approach and respiratory support, then identify reversible causes, then focused evaluation and diagnostics",
+      "Advanced imaging first, then ABCDE approach, then respiratory support last",
+      "Treat the underlying cause first, then obtain any vital signs",
+      "Obtain advanced diagnostics before any respiratory support is given"
+    ],
+    "answer": 0,
+    "e": "The lecture's stepwise approach begins with ABCDE and respiratory support, then identifying rapidly reversible causes, then focused clinical evaluation and initial/advanced diagnostics, and finally definitive treatment."
+  },
+  {
+    "q": "Why is arterial blood gas analysis described as 'key' to diagnosing and classifying respiratory failure?",
+    "options": [
+      "It directly measures PaO2 and PaCO2, which define the type and severity of respiratory failure",
+      "It is the only test that can identify the underlying cause",
+      "It replaces the need for any chest imaging",
+      "It is primarily used to assess renal function in these patients"
+    ],
+    "answer": 0,
+    "e": "Because respiratory failure is defined by specific PaO2 and PaCO2 thresholds, ABG is the essential confirmatory test for diagnosis and classification, though it does not by itself reveal the underlying cause."
+  },
+  {
+    "q": "In the initial workup of respiratory failure, an elevated creatine kinase (especially CK-MM) in the absence of cardiac symptoms should raise suspicion for which process?",
+    "options": [
+      "Myositis",
+      "Acute myocardial infarction",
+      "Chronic kidney disease",
+      "Pulmonary embolism"
+    ],
+    "answer": 0,
+    "e": "Elevated CK-MM (the skeletal muscle isoform) suggests myositis, whereas CK-MB and troponin are used to exclude a concurrent myocardial infarction."
+  },
+  {
+    "q": "Why might thyroid function tests be included in the workup of a patient with chronic hypercapnic respiratory failure?",
+    "options": [
+      "Hypothyroidism can cause chronic hypercapnic respiratory failure",
+      "Hyperthyroidism is a common cause of acute hypoxemic failure",
+      "TFTs are routine in every ICU admission regardless of presentation",
+      "Thyroid hormone directly measures respiratory muscle strength"
+    ],
+    "answer": 0,
+    "e": "Hypothyroidism can blunt the central respiratory drive and contribute to chronic hypercapnic respiratory failure, making TFTs relevant in the diagnostic workup."
+  },
+  {
+    "q": "Which of the following is described as an early clinical sign of respiratory failure, in contrast to cyanosis, which appears late?",
+    "options": [
+      "Tachycardia and mild hypertension",
+      "Cyanosis",
+      "Coma",
+      "Papilledema"
+    ],
+    "answer": 0,
+    "e": "Tachycardia and mild hypertension are early compensatory signs, whereas cyanosis is explicitly noted as a late sign, appearing once hypoxemia is more severe."
+  },
+  {
+    "q": "Why can hypoxemia and acidosis predispose a patient in respiratory failure to cardiac arrhythmias?",
+    "options": [
+      "Acidosis can cause electrolyte abnormalities, particularly hyperkalemia, which predisposes to arrhythmia",
+      "Hypoxemia directly increases serum sodium, causing arrhythmia",
+      "Acidosis always causes profound hypokalemia, stabilizing the myocardium",
+      "Arrhythmias in this setting are entirely unrelated to electrolyte shifts"
+    ],
+    "answer": 0,
+    "e": "Acidosis promotes a shift of potassium out of cells, causing hyperkalemia, which in turn predisposes to cardiac arrhythmias in the hypoxemic, acidotic patient."
+  },
+  {
+    "q": "Cor pulmonale, a complication of chronic hypoxemic respiratory failure, leads to right ventricular failure. Which findings would you expect on exam as a result?",
+    "options": [
+      "Hepatomegaly and peripheral edema",
+      "Bilateral basal crackles and orthopnea only",
+      "Left-sided S3 gallop with mitral regurgitation",
+      "Isolated papilledema without other findings"
+    ],
+    "answer": 0,
+    "e": "Cor pulmonale (pulmonary hypertension leading to right ventricular failure) produces right heart failure signs: hepatomegaly, peripheral edema, raised JVP, and sometimes jaundice."
+  },
+  {
+    "q": "A patient in respiratory failure develops asterixis, papilledema, and warm extremities. Which underlying gas abnormality best explains this specific cluster of findings?",
+    "options": [
+      "Hypercapnia",
+      "Isolated hypoxemia without hypercapnia",
+      "Hypocapnia from hyperventilation",
+      "Metabolic alkalosis unrelated to CO2"
+    ],
+    "answer": 0,
+    "e": "Asterixis, papilledema (from CO2-mediated cerebral vasodilation raising ICP), and warm extremities (from CO2-induced peripheral vasodilation) are classic hypercapnia-specific findings."
+  },
+  {
+    "q": "Why does hypercapnia cause headache and papilledema?",
+    "options": [
+      "CO2 acts as a potent cerebral vasodilator, increasing cerebral blood flow and intracranial pressure",
+      "CO2 directly damages the optic nerve",
+      "CO2 causes systemic hypertension, leading to papilledema",
+      "CO2 depletes cerebrospinal fluid, lowering ICP and causing headache"
+    ],
+    "answer": 0,
+    "e": "CO2 is the most important physiologic cerebral vasodilator; even small PaCO2 rises significantly increase cerebral blood flow and intracranial pressure, producing headache and papilledema."
+  },
+  {
+    "q": "Which finding is characteristic of hypercapnia but would be unusual as a primary feature of isolated hypoxemia?",
+    "options": [
+      "Warm extremities with a collapsing pulse",
+      "Cyanosis",
+      "Tachypnea",
+      "Pleuritic chest pain"
+    ],
+    "answer": 0,
+    "e": "Hypercapnia causes peripheral vasodilation, producing warm extremities and a bounding (collapsing) pulse — distinct from the features typically driven by hypoxemia alone."
+  },
+  {
+    "q": "A patient with ARDS from sepsis has hypoxemia that is refractory to oxygen therapy. What PCWP would be expected, and why?",
+    "options": [
+      "Normal, less than 18 mmHg, because ARDS is a non-cardiogenic process",
+      "High, greater than 18 mmHg, reflecting left heart failure",
+      "Undetectable, since PCWP cannot be measured in ARDS",
+      "High, but only in the first 24 hours of onset"
+    ],
+    "answer": 0,
+    "e": "ARDS causes non-cardiogenic pulmonary edema from increased capillary permeability, so PCWP remains normal (<18 mmHg), distinguishing it from cardiogenic edema where PCWP is elevated."
+  },
+  {
+    "q": "On chest X-ray, cardiogenic pulmonary edema classically shows which pattern, distinguishing it from ARDS?",
+    "options": [
+      "Cardiomegaly with perihilar 'bat-wing' infiltrates and possible pleural effusion",
+      "Normal heart size with diffuse alveolar flooding and no pleural effusion",
+      "Unilateral apical infiltrate with tracheal deviation",
+      "Isolated pleural effusion with a normal-appearing lung parenchyma"
+    ],
+    "answer": 0,
+    "e": "Cardiogenic edema shows cardiomegaly, vascular redistribution, perihilar bat-wing infiltrates, and often pleural effusion, whereas ARDS shows normal heart size with diffuse alveolar flooding and no effusion."
+  },
+  {
+    "q": "A key clinical distinguishing feature between ARDS and cardiogenic pulmonary edema is how hypoxemia responds to therapy. What is this difference?",
+    "options": [
+      "ARDS hypoxemia is refractory to oxygen; cardiogenic edema hypoxemia improves with high-flow oxygen",
+      "ARDS hypoxemia always improves with oxygen; cardiogenic edema never improves",
+      "Both conditions respond identically to supplemental oxygen",
+      "Neither condition shows any change in oxygenation with therapy"
+    ],
+    "answer": 0,
+    "e": "ARDS causes severe, oxygen-refractory hypoxemia (reflecting shunt physiology from alveolar flooding), while cardiogenic edema's hypoxemia typically improves with high-flow oxygen."
+  },
+  {
+    "q": "A 30-year-old woman with severe burns develops fever, tachycardia, dyspnea, and bilateral basal crackles days after her injury. What complication is most likely, and what is its underlying mechanism?",
+    "options": [
+      "ARDS secondary to septicemia, from increased capillary permeability and diffuse alveolar damage",
+      "Cardiogenic pulmonary edema from burn-induced myocarditis",
+      "A pulmonary embolism from immobility",
+      "Simple pneumonia with no systemic component"
+    ],
+    "answer": 0,
+    "e": "In a burn patient, sepsis is a classic trigger for ARDS — increased capillary permeability floods the alveoli with fluid bilaterally, distinct from a cardiac or purely infectious process."
+  },
+  {
+    "q": "What SpO2 threshold is used to indicate initiation of oxygen therapy?",
+    "options": [
+      "SpO2 less than 95%",
+      "SpO2 less than 100%",
+      "SpO2 less than 80% only",
+      "SpO2 less than 60%"
+    ],
+    "answer": 0,
+    "e": "Oxygen therapy is indicated for SpO2 below 95%, per the lecture's respiratory support protocol."
+  },
+  {
+    "q": "High-flow nasal cannula (HFNC) is primarily used to address which problem in respiratory failure?",
+    "options": [
+      "Oxygenation",
+      "Hypercapnia specifically",
+      "Cardiogenic pulmonary edema specifically",
+      "Airway obstruction from foreign body"
+    ],
+    "answer": 0,
+    "e": "HFNC's primary role, per the treatment table, is improving oxygenation, whereas BiPAP is specifically indicated for hypercapnic failure and cardiogenic pulmonary edema."
+  },
+  {
+    "q": "BiPAP (a form of noninvasive ventilation) is specifically indicated for which two conditions listed in the lecture?",
+    "options": [
+      "Hypercapnic respiratory failure and cardiogenic pulmonary edema",
+      "Isolated hypoxemic failure and pneumothorax",
+      "Foreign body aspiration and anaphylaxis",
+      "ARDS and septic shock exclusively"
+    ],
+    "answer": 0,
+    "e": "BiPAP is specifically indicated for hypercapnic respiratory failure (assisting ventilation) and cardiogenic pulmonary edema (improving oxygenation and reducing preload/afterload)."
+  },
+  {
+    "q": "What is the primary indication for invasive mechanical ventilation via endotracheal intubation, as opposed to noninvasive ventilation?",
+    "options": [
+      "Refractory respiratory failure, or failure of NIPPV, or inability to protect the airway",
+      "Any patient with SpO2 below 95%",
+      "Mild respiratory distress with intact airway reflexes",
+      "Chronic stable hypercapnia without acute decompensation"
+    ],
+    "answer": 0,
+    "e": "Invasive ventilation is reserved for severe or refractory respiratory failure, when NIPPV fails, or when the airway cannot be adequately protected — NIPPV is preferred for milder, intact-airway-reflex cases."
+  },
+  {
+    "q": "To correct hypercapnia on the ventilator, which parameter adjustments are most effective?",
+    "options": [
+      "Increase respiratory rate and/or tidal volume",
+      "Increase PEEP and/or FiO2",
+      "Decrease respiratory rate only",
+      "Decrease tidal volume and increase PEEP"
+    ],
+    "answer": 0,
+    "e": "Enhancing minute ventilation (via increased RR and/or tidal volume) clears more CO2, correcting hypercapnia — PEEP/FiO2 adjustments primarily target oxygenation, not CO2."
+  },
+  {
+    "q": "To correct hypoxemia on the ventilator, which parameter adjustments are most effective?",
+    "options": [
+      "Increase FiO2 and/or PEEP",
+      "Increase respiratory rate only",
+      "Decrease PEEP and FiO2",
+      "Increase tidal volume exclusively, with no change to FiO2 or PEEP"
+    ],
+    "answer": 0,
+    "e": "Oxygenation is primarily improved by increasing FiO2 and/or PEEP (which recruits collapsed alveoli), distinct from the RR/tidal volume adjustments used to correct CO2."
+  },
+  {
+    "q": "An intubated patient's peak inspiratory pressure (PIP) rises sharply while plateau pressure remains unchanged. What does this most likely indicate?",
+    "options": [
+      "Increased airway resistance, such as bronchospasm or a mucus plug",
+      "Decreased lung compliance from ARDS",
+      "Auto-PEEP from breath stacking",
+      "A large air leak in the ventilator circuit"
+    ],
+    "answer": 0,
+    "e": "A rise in PIP with normal plateau pressure reflects increased resistance to flow (bronchospasm, mucus plug, kinked tube), since plateau pressure — reflecting compliance — is unaffected."
+  },
+  {
+    "q": "An intubated ARDS patient shows a rising plateau pressure (Pplat) on the ventilator. What does this most likely indicate?",
+    "options": [
+      "Decreased lung compliance",
+      "Increased airway resistance only",
+      "An air leak in the ventilator circuit",
+      "A normal, expected finding requiring no action"
+    ],
+    "answer": 0,
+    "e": "Elevated plateau pressure reflects decreased lung compliance (as seen in ARDS, pneumonia, or pneumothorax) or auto-PEEP, and should prompt review of tidal volume to avoid barotrauma."
+  },
+  {
+    "q": "Which set of criteria supports proceeding with a spontaneous breathing trial (SBT) toward extubation?",
+    "options": [
+      "FiO2 < 50%, PEEP < 5, RSBI < 105, and resolution of the cause requiring intubation",
+      "FiO2 > 80%, PEEP > 10, and RSBI > 150",
+      "Persistent need for high PEEP and FiO2 with an unresolved underlying cause",
+      "RSBI greater than 105 with ongoing sedation requirement"
+    ],
+    "answer": 0,
+    "e": "Readiness for an SBT requires low ventilatory support (FiO2 <50%, PEEP <5), a favorable rapid shallow breathing index (RSBI <105), and resolution of the original indication for intubation."
+  },
+  {
+    "q": "Barotrauma from mechanical ventilation (ventilator-induced lung injury) is most directly associated with which ventilator settings?",
+    "options": [
+      "High tidal volume ventilation or plateau pressure greater than 30",
+      "Low tidal volume with low plateau pressure",
+      "Low FiO2 with high PEEP only",
+      "Any use of pressure support ventilation mode"
+    ],
+    "answer": 0,
+    "e": "Barotrauma risk rises with high tidal volumes or plateau pressures exceeding 30 cmH2O, which is why lung-protective ventilation strategies limit these parameters."
+  },
+  {
+    "q": "How does hyperoxia contribute to ventilator-induced lung injury?",
+    "options": [
+      "It worsens V/Q matching within the lung",
+      "It directly increases plateau pressure",
+      "It causes airway resistance to rise acutely",
+      "It has no mechanistic link to lung injury, only to retinal damage"
+    ],
+    "answer": 0,
+    "e": "Excess oxygen (hyperoxia) can worsen ventilation-perfusion matching and contributes to oxidative lung injury, making it a recognized complication of aggressive oxygen therapy."
+  },
+  {
+    "q": "Which complication of mechanical ventilation results from prolonged intubation and is a hospital-acquired infection risk?",
+    "options": [
+      "Ventilator-associated pneumonia",
+      "Barotrauma",
+      "Hyperoxia-induced V/Q mismatch",
+      "Auto-PEEP"
+    ],
+    "answer": 0,
+    "e": "Ventilator-associated pneumonia is a recognized infectious complication of prolonged invasive ventilation, distinct from the mechanical complications of barotrauma and hyperoxia."
+  },
+  {
+    "q": "A trauma patient develops sudden hypotension, absent breath sounds on one side, and tracheal deviation. What immediate intervention is required?",
+    "options": [
+      "Emergency chest decompression and chest tube placement for tension pneumothorax",
+      "IM epinephrine for suspected anaphylaxis",
+      "Naloxone for suspected opioid overdose",
+      "C1 esterase inhibitor for suspected angioedema"
+    ],
+    "answer": 0,
+    "e": "This presentation is classic for tension pneumothorax, a rapidly reversible cause of respiratory failure requiring emergency needle/chest decompression and chest tube placement."
+  },
+  {
+    "q": "A patient found unresponsive with pinpoint pupils and a respiratory rate of 4/min should receive which immediate reversible-cause-targeted treatment?",
+    "options": [
+      "Naloxone",
+      "IM epinephrine",
+      "C1 esterase inhibitor",
+      "Emergency chest decompression"
+    ],
+    "answer": 0,
+    "e": "Pinpoint pupils with severe bradypnea is classic for opioid toxicity; naloxone is the targeted reversal agent for this rapidly reversible cause of respiratory failure."
+  },
+  {
+    "q": "A patient develops acute stridor, facial and lip swelling, and hypotension after a bee sting. What immediate treatment targets the underlying reversible cause?",
+    "options": [
+      "IM epinephrine",
+      "C1 esterase inhibitor",
+      "Naloxone",
+      "Bronchodilators and corticosteroids alone"
+    ],
+    "answer": 0,
+    "e": "This presentation is anaphylaxis; IM epinephrine is the immediate, life-saving, targeted treatment, distinct from angioedema (treated with C1 esterase inhibitor) or opioid overdose."
+  },
+  {
+    "q": "A patient with hereditary angioedema develops sudden tongue and airway swelling without urticaria or hypotension. What specific reversible-cause treatment is indicated?",
+    "options": [
+      "C1 esterase inhibitor",
+      "IM epinephrine",
+      "Naloxone",
+      "Magnesium sulfate"
+    ],
+    "answer": 0,
+    "e": "Hereditary angioedema (C1 inhibitor deficiency) is specifically treated with C1 esterase inhibitor replacement, distinct from the epinephrine used for classic allergic anaphylaxis."
+  },
+  {
+    "q": "A young asthmatic in status asthmaticus with impending respiratory failure should receive which combination of targeted therapies?",
+    "options": [
+      "Bronchodilators, corticosteroids, and magnesium",
+      "Naloxone and IM epinephrine only",
+      "C1 esterase inhibitor and bronchodilators",
+      "Emergency chest decompression and antibiotics"
+    ],
+    "answer": 0,
+    "e": "Status asthmaticus, a rapidly reversible cause of respiratory failure, is treated with bronchodilators, corticosteroids, and magnesium sulfate as outlined in the lecture."
+  },
+  {
+    "q": "A patient with acute cardiogenic (flash) pulmonary edema and hypertension in respiratory distress should receive which combination of targeted therapies?",
+    "options": [
+      "NIPPV and vasodilators for acute heart failure",
+      "Naloxone and epinephrine",
+      "Antibiotics and corticosteroids",
+      "Emergency needle decompression"
+    ],
+    "answer": 0,
+    "e": "Flash pulmonary edema is managed with noninvasive positive pressure ventilation and vasodilator therapy to reduce cardiac preload/afterload, per the reversible-causes list."
+  },
+  {
+    "q": "Which gastrointestinal complication is common in acute respiratory failure and is often prevented with prophylactic therapy such as a PPI?",
+    "options": [
+      "Stress ulceration",
+      "Acute pancreatitis",
+      "Cholecystitis",
+      "Mesenteric ischemia"
+    ],
+    "answer": 0,
+    "e": "Stress-related mucosal disease/ulceration is common in critically ill respiratory failure patients, which is why stress ulcer prophylaxis (e.g., PPIs) is often given."
+  },
+  {
+    "q": "Which renal complication is commonly associated with acute respiratory failure?",
+    "options": [
+      "Acute kidney injury with electrolyte and acid-base abnormalities",
+      "Nephrotic syndrome specifically",
+      "Renal artery stenosis",
+      "Isolated hypercalcemia"
+    ],
+    "answer": 0,
+    "e": "Acute kidney injury, along with electrolyte and acid-base disturbances, is a recognized systemic complication of acute respiratory failure and critical illness."
+  },
+  {
+    "q": "Which cardiovascular complications are associated with acute respiratory failure, beyond cor pulmonale?",
+    "options": [
+      "Hypotension, reduced cardiac output, arrhythmias, and acute MI",
+      "Isolated bradycardia with no other cardiac effects",
+      "Hypertension crisis exclusively",
+      "Mitral valve prolapse"
+    ],
+    "answer": 0,
+    "e": "Respiratory failure and its treatment (including mechanical ventilation) can cause hypotension, reduced cardiac output, arrhythmias, pericarditis, and acute MI."
+  },
+  {
+    "q": "A 65-year-old male smoker presents with dyspnea, drowsiness, and a flapping tremor. Exam reveals a bounding pulse and diffuse wheezes. What is the most likely diagnosis and underlying type of respiratory failure?",
+    "options": [
+      "COPD exacerbation causing Type 2 respiratory failure",
+      "Cardiogenic pulmonary edema causing Type 1 respiratory failure",
+      "Pulmonary embolism causing Type 1 respiratory failure",
+      "Anaphylaxis causing upper airway obstruction"
+    ],
+    "answer": 0,
+    "e": "Drowsiness and asterixis (flapping tremor) reflect hypercapnia, and the bounding pulse reflects CO2-mediated vasodilation — with his smoking history, this points to COPD causing Type 2 respiratory failure."
+  },
+  {
+    "q": "In the COPD patient above, why is diffuse wheezing on exam not enough by itself to confirm the diagnosis?",
+    "options": [
+      "Diffuse wheezing can also be caused by asthma or heart failure ('cardiac asthma')",
+      "Wheezing is only ever heard in pneumothorax",
+      "Wheezing always indicates a pulmonary embolism",
+      "Wheezing is exclusive to upper airway obstruction"
+    ],
+    "answer": 0,
+    "e": "The lecture specifically notes diffuse wheezing has a differential including asthma, COPD, and heart failure ('cardiac asthma'), so history and other findings are needed to differentiate them."
+  },
+  {
+    "q": "A 70-year-old woman with poorly controlled hypertension presents at midnight with severe dyspnea, sweating, fine tremor, and bilateral basal crepitations. What is the most likely diagnosis and type of respiratory failure?",
+    "options": [
+      "Cardiogenic pulmonary edema causing Type 1 respiratory failure",
+      "COPD exacerbation causing Type 2 respiratory failure",
+      "Tension pneumothorax causing Type 1 respiratory failure",
+      "Guillain-Barré syndrome causing Type 2 respiratory failure"
+    ],
+    "answer": 0,
+    "e": "Nocturnal dyspnea, sweating, and bibasilar crackles in a hypertensive patient are classic for cardiogenic (flash) pulmonary edema, causing Type 1 (hypoxemic) respiratory failure."
+  },
+  {
+    "q": "What is the most appropriate initial management for the cardiogenic pulmonary edema patient above?",
+    "options": [
+      "NIPPV (e.g., BiPAP) and vasodilator therapy",
+      "Naloxone and observation",
+      "Bronchodilators and magnesium sulfate",
+      "Immediate endotracheal intubation without a trial of NIV first"
+    ],
+    "answer": 0,
+    "e": "Flash pulmonary edema is specifically managed with NIPPV and vasodilators to reduce cardiac afterload/preload, reserving intubation for cases refractory to noninvasive support."
+  },
+  {
+    "q": "A 30-year-old woman with severe burns develops fever, tachycardia, dyspnea, and bilateral basal crackles. Blood cultures return positive. What is the most likely complication, and what distinguishes it from cardiogenic pulmonary edema on imaging?",
+    "options": [
+      "ARDS from sepsis; normal heart size with diffuse infiltrates and no pleural effusion, unlike cardiogenic edema",
+      "Cardiogenic pulmonary edema; cardiomegaly with perihilar infiltrates",
+      "Simple aspiration pneumonia; a focal lobar infiltrate only",
+      "Pulmonary embolism; a wedge-shaped peripheral infiltrate"
+    ],
+    "answer": 0,
+    "e": "Sepsis is a classic trigger for ARDS, distinguished radiographically from cardiogenic edema by a normal heart size, diffuse (not perihilar) infiltrates, and typically no pleural effusion."
+  },
+  {
+    "q": "A patient intubated for ARDS is noted to have a PCWP of 12 mmHg despite severe, oxygen-refractory hypoxemia. How does this finding support the diagnosis of ARDS over cardiogenic edema?",
+    "options": [
+      "A PCWP under 18 mmHg argues against a cardiogenic cause, supporting a non-cardiogenic (ARDS) process",
+      "A PCWP of 12 mmHg is diagnostic of cardiogenic edema",
+      "PCWP cannot be used to distinguish these two conditions",
+      "A low PCWP indicates the patient is hypervolemic"
+    ],
+    "answer": 0,
+    "e": "A normal/low PCWP (<18 mmHg) in the setting of refractory hypoxemia supports a non-cardiogenic process like ARDS, since cardiogenic edema would show an elevated PCWP (>18 mmHg) from left heart failure."
+  },
+  {
+    "q": "A patient with acute hypercapnic respiratory failure from a COPD exacerbation is started on BiPAP. Which finding after 1 hour would suggest BiPAP is failing and invasive ventilation should be considered?",
+    "options": [
+      "Worsening mental status and rising PaCO2 despite BiPAP",
+      "Improved mental status with falling PaCO2",
+      "Stable vital signs and improved dyspnea",
+      "Mild residual dyspnea with a stable ABG"
+    ],
+    "answer": 0,
+    "e": "Worsening mental status and a rising (not falling) PaCO2 despite adequate noninvasive support indicates NIPPV failure, and the patient should be evaluated for escalation to invasive mechanical ventilation."
+  },
+  {
+    "q": "A patient with myasthenic crisis has a forced vital capacity that is rapidly declining, though her ABG still shows a normal PaCO2. What is the most appropriate approach?",
+    "options": [
+      "Proceed with airway/ventilatory support based on clinical trajectory rather than waiting for ABG changes",
+      "Wait until PaCO2 rises above 50 mmHg before considering any respiratory support",
+      "Discharge home since her ABG is currently normal",
+      "Treat with naloxone as the definitive reversible-cause therapy"
+    ],
+    "answer": 0,
+    "e": "In neuromuscular respiratory failure, ABG changes are a late finding; declining vital capacity and clinical trajectory should guide the decision to intervene before the patient develops overt hypercapnia or arrest."
+  }
+];
+</script>
+
+<script>
+/* ===== Quiz engine ===== */
+(function(){
+  const bank = QUESTIONS.map(q=>({...q}));
+  const quizEl = document.getElementById('quiz');
+  const totalEl = document.getElementById('total');
+  const answeredEl = document.getElementById('answered');
+  const scorepillEl = document.getElementById('scorepill');
+  const barfill = document.getElementById('barfill');
+  const submitBtn = document.getElementById('submitBtn');
+  const submitRow = document.getElementById('submitRow');
+  const hint = document.getElementById('hint');
+  const resultEl = document.getElementById('result');
+  const LETTERS = ['A','B','C','D','E','F'];
+  const PASS = 70;
+
+  let state = [];
+
+  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+  function build(){
+    quizEl.innerHTML='';
+    state = bank.map(()=>({answered:false,correct:false}));
+    totalEl.textContent = bank.length;
+
+    bank.forEach((item,qi)=>{
+      // shuffle options, track correct index
+      const order = shuffle(item.options.map((t,idx)=>({t,idx})));
+      const correctPos = order.findIndex(o=>o.idx===item.answer);
+
+      const card = document.createElement('div');
+      card.className='q';
+      card.id='q'+qi;
+
+      const head = document.createElement('div');
+      head.className='q-head';
+      head.innerHTML = `<span class="q-num">Q${String(qi+1).padStart(2,'0')}</span><span class="q-text"></span>`;
+      head.querySelector('.q-text').textContent = item.q;
+      card.appendChild(head);
+
+      const opts = document.createElement('div');
+      opts.className='opts';
+      order.forEach((o,pos)=>{
+        const b = document.createElement('button');
+        b.className='opt';
+        b.innerHTML = `<span class="tag">${LETTERS[pos]}</span><span class="txt"></span><span class="mark"></span>`;
+        b.querySelector('.txt').textContent = o.t;
+        b.addEventListener('click',()=>choose(qi,pos,correctPos,opts,exp));
+        opts.appendChild(b);
+      });
+      card.appendChild(opts);
+
+      const exp = document.createElement('div');
+      exp.className='explain';
+      exp.innerHTML = `<b>Why:</b> ${item.e}`;
+      card.appendChild(exp);
+
+      quizEl.appendChild(card);
+    });
+    update();
+  }
+
+  function choose(qi,pos,correctPos,optsEl,expEl){
+    if(state[qi].answered) return;
+    state[qi].answered=true;
+    state[qi].correct = (pos===correctPos);
+    const buttons=[...optsEl.children];
+    buttons.forEach((b,i)=>{
+      b.disabled=true;
+      if(i===correctPos){b.classList.add('correct');b.querySelector('.mark').textContent='✓';}
+      if(i===pos && pos!==correctPos){b.classList.add('wrong');b.querySelector('.mark').textContent='✗';}
+    });
+    expEl.classList.add('show');
+    update();
+  }
+
+  function update(){
+    const answered = state.filter(s=>s.answered).length;
+    const correct = state.filter(s=>s.correct).length;
+    answeredEl.textContent = answered;
+    scorepillEl.textContent = correct+' correct';
+    barfill.style.width = (answered/bank.length*100)+'%';
+    const done = answered===bank.length;
+    submitBtn.disabled = !done;
+    hint.textContent = done ? 'All answered — lock in your score' : (bank.length-answered)+' left';
+  }
+
+  submitBtn.addEventListener('click',()=>{
+    const correct = state.filter(s=>s.correct).length;
+    const pct = Math.round(correct/bank.length*100);
+    const pass = pct>=PASS;
+    resultEl.className='result show '+(pass?'pass':'fail');
+    document.getElementById('verdict').textContent = pass?'Pass':'Keep reviewing';
+    document.getElementById('bigscore').textContent = pct+'%';
+    document.getElementById('resultDetail').textContent =
+      `${correct} of ${bank.length} correct · passing mark is ${PASS}%`;
+    submitRow.style.display='none';
+    resultEl.scrollIntoView({behavior:'smooth',block:'center'});
+  });
+
+  window.retry=function(){
+    resultEl.className='result';
+    submitRow.style.display='';
+    build();
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+
+  build();
+})();
+</script>
+</body>
+</html>

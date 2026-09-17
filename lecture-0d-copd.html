@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>COPD — Quiz</title>
+<style>
+  :root{
+    --ink:#0a0e14; --ink-2:#0f1620; --panel:#121b28; --panel-2:#16212f;
+    --line:#1f2d3f; --line-2:#293a50;
+    --text:#e6edf5; --muted:#8598ad; --faint:#5a6b82;
+    --accent:#2dd4bf; --accent-2:#14b8a6; --accent-soft:rgba(45,212,191,0.12);
+    --good:#34d399; --good-soft:rgba(52,211,153,0.14); --good-line:rgba(52,211,153,0.5);
+    --bad:#f87171; --bad-soft:rgba(248,113,113,0.13); --bad-line:rgba(248,113,113,0.5);
+    --gold:#fbbf24;
+    --mono:'SF Mono',ui-monospace,'Cascadia Code','JetBrains Mono',Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;background:var(--ink);color:var(--text);font-family:var(--sans);
+    line-height:1.55;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background-image:radial-gradient(1200px 600px at 80% -10%,rgba(56,189,248,0.06),transparent 60%),radial-gradient(900px 500px at -10% 110%,rgba(56,189,248,0.05),transparent 60%);
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:22px 18px 96px;}
+
+  /* top bar */
+  .top{display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap;}
+  .back{
+    display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--muted);
+    font-family:var(--mono);font-size:13px;padding:9px 14px;border:1px solid var(--line);
+    border-radius:11px;background:var(--panel);transition:.15s;
+  }
+  .back:active{background:var(--panel-2);}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--accent);
+    text-transform:uppercase;border:1px solid var(--line-2);padding:6px 12px;border-radius:20px;background:var(--accent-soft);}
+
+  h1{font-family:var(--mono);font-size:clamp(26px,6vw,38px);font-weight:700;letter-spacing:-.01em;
+    margin:6px 0 6px;line-height:1.1;}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 22px;max-width:60ch;}
+
+  /* progress */
+  .progress-wrap{position:sticky;top:8px;z-index:20;margin-bottom:26px;}
+  .progress-card{background:rgba(15,22,32,0.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid var(--line);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:14px;}
+  .progress-meta{font-family:var(--mono);font-size:12.5px;color:var(--muted);white-space:nowrap;}
+  .progress-meta b{color:var(--text);}
+  .bar{flex:1;height:7px;background:var(--ink-2);border-radius:99px;overflow:hidden;border:1px solid var(--line);}
+  .bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent-2),var(--accent));
+    border-radius:99px;transition:width .35s cubic-bezier(.4,0,.2,1);}
+  .score-pill{font-family:var(--mono);font-size:12.5px;color:var(--good);white-space:nowrap;}
+
+  /* question card */
+  .q{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 18px;margin-bottom:16px;
+    scroll-margin-top:90px;}
+  .q-head{display:flex;gap:12px;align-items:baseline;margin-bottom:14px;}
+  .q-num{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700;flex:none;
+    border:1px solid var(--line-2);background:var(--accent-soft);border-radius:8px;padding:3px 9px;min-width:44px;text-align:center;}
+  .q-text{font-size:16.5px;font-weight:600;line-height:1.5;letter-spacing:-.005em;}
+  .opts{display:flex;flex-direction:column;gap:9px;margin-top:4px;}
+  .opt{
+    display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;
+    background:var(--panel-2);border:1px solid var(--line);border-radius:12px;
+    padding:14px 15px;color:var(--text);font-size:15.5px;font-family:inherit;line-height:1.45;
+    cursor:pointer;transition:border-color .15s,background .15s,transform .06s;
+  }
+  .opt:active{transform:scale(.994);}
+  @media(hover:hover){.opt:not(:disabled):hover{border-color:var(--accent-2);background:var(--panel);}}
+  .opt .tag{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--muted);flex:none;
+    width:24px;height:24px;border-radius:7px;border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .opt .txt{flex:1;}
+  .opt:disabled{cursor:default;}
+  .opt.correct{background:var(--good-soft);border-color:var(--good-line);}
+  .opt.correct .tag{color:var(--good);border-color:var(--good-line);background:var(--good-soft);}
+  .opt.wrong{background:var(--bad-soft);border-color:var(--bad-line);}
+  .opt.wrong .tag{color:var(--bad);border-color:var(--bad-line);background:var(--bad-soft);}
+  .opt .mark{margin-left:auto;font-family:var(--mono);font-size:13px;font-weight:700;flex:none;align-self:center;}
+  .opt.correct .mark{color:var(--good);}
+  .opt.wrong .mark{color:var(--bad);}
+
+  .explain{margin-top:13px;border-left:3px solid var(--accent-2);background:var(--ink-2);
+    border-radius:0 10px 10px 0;padding:12px 15px;font-size:14.5px;color:var(--muted);display:none;}
+  .explain.show{display:block;animation:fade .25s ease;}
+  .explain b{color:var(--text);font-weight:600;}
+  @keyframes fade{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+
+  /* result */
+  .result{background:linear-gradient(160deg,var(--panel),var(--ink-2));border:1px solid var(--line-2);
+    border-radius:18px;padding:30px 22px;text-align:center;margin-top:8px;display:none;}
+  .result.show{display:block;animation:fade .3s ease;}
+  .result .verdict{font-family:var(--mono);font-size:14px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px;}
+  .result.pass .verdict{color:var(--good);}
+  .result.fail .verdict{color:var(--gold);}
+  .result .big{font-family:var(--mono);font-size:56px;font-weight:700;line-height:1;margin:6px 0;}
+  .result .detail{color:var(--muted);font-size:15px;margin-bottom:20px;}
+  .result .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .btn{font-family:var(--mono);font-size:14px;padding:12px 20px;border-radius:11px;border:1px solid var(--line-2);
+    background:var(--panel-2);color:var(--text);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:.15s;}
+  .btn:active{transform:scale(.97);}
+  .btn.primary{background:var(--accent-2);border-color:var(--accent);color:#04121c;font-weight:700;}
+
+  .submit-row{margin-top:8px;text-align:center;}
+  .submit-btn{font-family:var(--mono);font-size:15px;font-weight:700;padding:15px 30px;border-radius:13px;
+    border:1px solid var(--accent);background:var(--accent-2);color:#04121c;cursor:pointer;transition:.15s;width:100%;max-width:340px;}
+  .submit-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .submit-btn:not(:disabled):active{transform:scale(.98);}
+  .hint{font-family:var(--mono);font-size:12.5px;color:var(--faint);margin-top:12px;}
+
+  @media(min-width:768px){
+    .wrap{padding:34px 26px 110px;}
+    .q{padding:24px 24px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="index.html">&larr; All lectures</a>
+    <span class="eyebrow">Respiratory Module · Nerdosis</span>
+  </div>
+  <h1>COPD</h1>
+  <p class="sub">Emphysema vs chronic bronchitis, GOLD classification and groups, diagnosis, treatment, acute exacerbations, and hard clinical vignettes. Tap an answer to lock it in and see instant feedback.</p>
+
+  <div class="progress-wrap">
+    <div class="progress-card">
+      <span class="progress-meta"><b id="answered">0</b>/<span id="total">0</span> answered</span>
+      <div class="bar"><i id="barfill"></i></div>
+      <span class="score-pill" id="scorepill">0 correct</span>
+    </div>
+  </div>
+
+  <div id="quiz"></div>
+
+  <div class="submit-row" id="submitRow">
+    <button class="submit-btn" id="submitBtn" disabled>Finish &amp; see score</button>
+    <div class="hint" id="hint">Answer all questions to finish</div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="verdict" id="verdict"></div>
+    <div class="big" id="bigscore"></div>
+    <div class="detail" id="resultDetail"></div>
+    <div class="actions">
+      <button class="btn primary" onclick="retry()">Try again</button>
+      <a class="btn" href="index.html">Back to lectures</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== Question bank =====
+   answer = index of correct option. Options are shuffled at render so position carries no signal. */
+const QUESTIONS = [
+  {
+    "q": "Which combination of features defines COPD as presented in the lecture?",
+    "options": [
+      "A preventable and treatable disease with persistent, usually progressive airflow limitation and enhanced chronic airway inflammation to noxious particles or gases",
+      "A fully reversible airflow limitation with no inflammatory component",
+      "An acute, self-limited airway inflammatory process unrelated to environmental exposure",
+      "A restrictive lung disease characterized by fibrosis and reduced lung volumes"
+    ],
+    "answer": 0,
+    "e": "COPD is defined as preventable and treatable, with persistent, usually progressive airflow limitation and an enhanced chronic inflammatory response to noxious particles or gases."
+  },
+  {
+    "q": "By definition, how long must productive cough be present, and over what timeframe, to diagnose chronic bronchitis?",
+    "options": [
+      "At least 3 months per year for 2 consecutive years",
+      "At least 1 month total, regardless of recurrence",
+      "At least 6 months in a single year only",
+      "At least 3 months in any single lifetime episode"
+    ],
+    "answer": 0,
+    "e": "Chronic bronchitis requires a productive cough for at least 3 months per year for 2 consecutive years, not explained by an alternative diagnosis."
+  },
+  {
+    "q": "Emphysema is defined by which structural change, and why can it not be diagnosed by symptoms alone?",
+    "options": [
+      "Permanent dilation of air spaces distal to the terminal bronchioles from alveolar wall destruction; it is fundamentally a pathologic diagnosis",
+      "Reversible bronchoconstriction; it is a purely clinical diagnosis based on wheeze",
+      "Fibrotic thickening of the alveolar septa; it is diagnosed by chest CT alone",
+      "Mucus gland hyperplasia in the bronchi; it is diagnosed by sputum culture"
+    ],
+    "answer": 0,
+    "e": "Emphysema is defined pathologically by permanent airspace enlargement distal to the terminal bronchioles from destruction of alveolar walls — it cannot be diagnosed on symptoms because it is fundamentally a pathologic (structural), not clinical, diagnosis."
+  },
+  {
+    "q": "What structural feature is notably absent in emphysema, distinguishing it from restrictive lung diseases?",
+    "options": [
+      "Fibrosis",
+      "Alveolar wall destruction",
+      "Airspace enlargement",
+      "Loss of elastic recoil"
+    ],
+    "answer": 0,
+    "e": "Emphysema does not involve fibrosis — this absence is what distinguishes it from restrictive lung diseases, which are characterized by fibrotic, stiff lungs."
+  },
+  {
+    "q": "According to the lecture, tobacco smoke is implicated in approximately what proportion of COPD cases?",
+    "options": [
+      "90–95%",
+      "50%",
+      "25%",
+      "Less than 10%"
+    ],
+    "answer": 0,
+    "e": "The lecture cites tobacco smoke as responsible for roughly 90% (one slide) to 95% (another slide) of COPD cases, making it by far the dominant risk factor."
+  },
+  {
+    "q": "How does alpha-1 antitrypsin deficiency interact with smoking to affect COPD risk?",
+    "options": [
+      "The combination of AATD and smoking increases risk even further than either alone",
+      "Smoking has no additional effect on risk in patients with AATD",
+      "AATD only causes COPD in nonsmokers, never in smokers",
+      "AATD protects against the effects of smoking on the lungs"
+    ],
+    "answer": 0,
+    "e": "Alpha-1 antitrypsin deficiency increases COPD risk, and this risk is even worse when combined with smoking, since both pathways converge on unopposed elastase activity."
+  },
+  {
+    "q": "Which of the following is listed as an occupational exposure risk factor for COPD?",
+    "options": [
+      "Coal dust, silica, and cadmium exposure",
+      "Only exposure to asbestos",
+      "Only exposure to ionizing radiation",
+      "Exposure to formaldehyde exclusively"
+    ],
+    "answer": 0,
+    "e": "Occupational exposures to coal dust, silica, and cadmium are specifically listed as COPD risk factors, alongside indoor air pollution from biomass fuel cooking."
+  },
+  {
+    "q": "Which early-life factor is listed as a risk factor for later development of COPD?",
+    "options": [
+      "Low birth weight",
+      "High birth weight",
+      "Cesarean delivery",
+      "Breastfeeding beyond 6 months"
+    ],
+    "answer": 0,
+    "e": "Low birth weight, along with recurrent childhood infections and maternal smoking, is listed among the early-life risk factors for COPD."
+  },
+  {
+    "q": "Which of the following correctly characterizes chronic bronchitis ('blue bloaters') compared with emphysema?",
+    "options": [
+      "Overweight body habitus with cyanosis/hypoxemia, and earlier development of hypercapnia",
+      "Thin body habitus with a normal PaCO2 maintained until late disease",
+      "Predominant dyspnea with minimal cough or sputum",
+      "A purely pathological diagnosis requiring tissue biopsy"
+    ],
+    "answer": 0,
+    "e": "Chronic bronchitis ('blue bloaters') patients tend to be overweight, cyanotic/hypoxemic, and develop hypercapnia earlier — the opposite pattern from emphysema ('pink puffers'), who stay thin with preserved PaCO2 until late."
+  },
+  {
+    "q": "A patient is described as thin, breathless, using pursed-lip breathing, with a barrel chest and minimal cough. Which COPD phenotype does this best fit?",
+    "options": [
+      "Emphysema ('pink puffer')",
+      "Chronic bronchitis ('blue bloater')",
+      "Asthma-COPD overlap exclusively",
+      "Restrictive lung disease"
+    ],
+    "answer": 0,
+    "e": "This is the classic 'pink puffer' emphysema phenotype: thin, distressed-appearing, tachypneic with pursed-lip breathing, and increased AP diameter (barrel chest)."
+  },
+  {
+    "q": "Regarding accessory muscle use, how do emphysema and chronic bronchitis patients typically differ on exam?",
+    "options": [
+      "Emphysema patients distressed and using accessory muscles; chronic bronchitis patients in no apparent distress without accessory muscle use",
+      "Chronic bronchitis patients are always more distressed-appearing than emphysema patients",
+      "Neither phenotype uses accessory muscles at any stage",
+      "Both phenotypes appear identically distressed at all stages of disease"
+    ],
+    "answer": 0,
+    "e": "Per the comparison table, emphysema ('pink puffer') patients appear distressed and use accessory muscles, while chronic bronchitis ('blue bloater') patients appear in no apparent distress and don't use accessory muscles despite significant hypoxemia."
+  },
+  {
+    "q": "Which histologic pattern of emphysema is most common in smokers, and where does it predominantly affect the lung?",
+    "options": [
+      "Centrilobular emphysema, predominantly affecting the upper lung zones",
+      "Panacinar emphysema, predominantly affecting the lower lung zones",
+      "Paraseptal emphysema, predominantly affecting the mid-lung zones",
+      "Distal acinar emphysema, affecting the entire lung uniformly"
+    ],
+    "answer": 0,
+    "e": "Centrilobular emphysema is the most common pattern in smokers, destroying the proximal (central) acinus with a predilection for the upper lung zones."
+  },
+  {
+    "q": "Panacinar (panlobular) emphysema is classically associated with which condition, and how does its distribution differ from centrilobular disease?",
+    "options": [
+      "Alpha-1 antitrypsin deficiency; it involves both the proximal and distal acinus with a predilection for the lower lung zones",
+      "Chronic bronchitis; it is limited strictly to the proximal acinus in the upper lobes",
+      "Cystic fibrosis; it spares the acinus entirely",
+      "Tuberculosis; it predominantly affects the upper lobes only"
+    ],
+    "answer": 0,
+    "e": "Panacinar emphysema is seen with alpha-1 antitrypsin deficiency, destroying both proximal and distal portions of the acinus, with a predilection for the lower lung zones — opposite to centrilobular disease's upper-zone predominance."
+  },
+  {
+    "q": "In the inflammatory cascade of COPD, which cell types release cytokines, growth factors, and proteolytic enzymes that drive tissue damage?",
+    "options": [
+      "Neutrophils, macrophages, and CD8+ T-cells",
+      "Eosinophils, mast cells, and Th2 cells",
+      "B-lymphocytes and plasma cells",
+      "Basophils and NK cells"
+    ],
+    "answer": 0,
+    "e": "COPD's inflammatory infiltrate is dominated by neutrophils, macrophages, and CD8+ T-cells — distinct from the Th2/eosinophil/mast cell pattern seen in classic allergic asthma."
+  },
+  {
+    "q": "Overproduction of growth factors in COPD airway inflammation leads to which structural change?",
+    "options": [
+      "Peribronchiolar fibrosis, narrowing the airway",
+      "Alveolar hyperplasia, widening the airway",
+      "Loss of goblet cells, reducing mucus production",
+      "Increased ciliary function, enhancing mucus clearance"
+    ],
+    "answer": 0,
+    "e": "Growth factor overproduction drives peribronchiolar fibrosis, which narrows the airway lumen — contributing to the fixed component of airflow obstruction."
+  },
+  {
+    "q": "Goblet cell proliferation and hypertrophy in chronic bronchitis leads to which clinical consequence?",
+    "options": [
+      "Mucus hypersecretion and impaired ciliary function, causing chronic productive cough",
+      "Decreased mucus production and improved airway clearance",
+      "Loss of the cough reflex entirely",
+      "Increased alveolar surface area for gas exchange"
+    ],
+    "answer": 0,
+    "e": "Goblet cell hyperplasia increases mucus production while impairing ciliary clearance, together producing the chronic productive cough that defines chronic bronchitis."
+  },
+  {
+    "q": "How does nicotine (or other noxious stimuli) contribute to parenchymal destruction in emphysema at the molecular level?",
+    "options": [
+      "It inactivates protease inhibitors like alpha-1-antitrypsin, causing unopposed elastase activity that destroys alveolar walls",
+      "It directly stimulates collagen deposition, causing fibrosis",
+      "It increases surfactant production, causing alveolar collapse",
+      "It selectively kills only ciliated epithelial cells, sparing elastic tissue"
+    ],
+    "answer": 0,
+    "e": "Nicotine inactivates protease inhibitors (especially alpha-1-antitrypsin), disrupting the protease-antiprotease balance and allowing unchecked elastase activity to destroy alveolar walls and elastic tissue."
+  },
+  {
+    "q": "Beyond inactivating alpha-1-antitrypsin, what other mechanism does tobacco smoke use to damage the lung, according to the notes?",
+    "options": [
+      "It increases activated PMNs and macrophages and raises oxidative stress via free-radical production",
+      "It selectively suppresses eosinophil activation only",
+      "It has no direct cellular effect beyond antiprotease inactivation",
+      "It reduces neutrophil recruitment to the airway"
+    ],
+    "answer": 0,
+    "e": "Tobacco smoke increases the number of activated neutrophils (PMNs) and macrophages, and independently raises oxidative stress through free-radical production, compounding the antiprotease inactivation."
+  },
+  {
+    "q": "In chronic bronchitis pathophysiology, what combination of processes converges to cause airway obstruction?",
+    "options": [
+      "Mucus hypersecretion, peribronchiolar fibrosis, and bronchospasm",
+      "Alveolar septal destruction alone, with no mucus component",
+      "Loss of elastic tissue alone, with no inflammatory component",
+      "Increased surfactant production alone"
+    ],
+    "answer": 0,
+    "e": "Chronic bronchitis obstruction arises from the combination of increased mucus, fibrosis (from chronic inflammation), and bronchospasm, ultimately causing air trapping and hyperinflation."
+  },
+  {
+    "q": "In emphysema, loss of elastic tissue support contributes to obstruction through which mechanism?",
+    "options": [
+      "Bronchial collapse during expiration due to loss of the radial traction that normally holds airways open",
+      "Increased bronchial wall thickness from fibrosis",
+      "Excess mucus production overwhelming the airway",
+      "Bronchospasm from smooth muscle hypertrophy"
+    ],
+    "answer": 0,
+    "e": "Elastic tissue normally provides radial traction that keeps small airways open; its destruction in emphysema causes dynamic bronchial collapse during expiration, trapping air distally."
+  },
+  {
+    "q": "Which of the following is classified as a systemic (rather than pulmonary) feature of COPD?",
+    "options": [
+      "Skeletal muscle dysfunction",
+      "Chronic productive cough",
+      "Wheezing",
+      "Chest tightness"
+    ],
+    "answer": 0,
+    "e": "Skeletal muscle dysfunction, along with weight loss, peripheral edema, osteoporosis, and depression, is listed as a systemic feature of COPD, distinct from the pulmonary symptom cluster (cough, dyspnea, sputum, wheeze, chest tightness)."
+  },
+  {
+    "q": "On auscultation, what finding would suggest severe COPD rather than earlier-stage disease?",
+    "options": [
+      "Decreased breath sounds",
+      "A new-onset pleural friction rub",
+      "Bronchial breath sounds over the lower lobes",
+      "A loud S3 gallop"
+    ],
+    "answer": 0,
+    "e": "Decreased (diminished) breath sounds are listed as a sign of severe COPD, along with tachypnea, tachycardia, cyanosis, and accessory muscle use — reflecting advanced hyperinflation and air trapping."
+  },
+  {
+    "q": "A COPD patient adopts a posture of leaning forward with arms resting on the knees. What is this position intended to relieve?",
+    "options": [
+      "Dyspnea, by mechanically assisting accessory respiratory muscles (the tripod position)",
+      "Chest pain from pericarditis",
+      "Orthostatic hypotension",
+      "Abdominal pain from hepatomegaly"
+    ],
+    "answer": 0,
+    "e": "The tripod position is a posture that relieves dyspnea by optimizing the mechanical advantage of accessory respiratory muscles, and is listed as a sign of severe COPD."
+  },
+  {
+    "q": "What spirometric finding is required to confirm the diagnosis of COPD?",
+    "options": [
+      "Post-bronchodilator FEV1/FVC ratio less than 0.70",
+      "Pre-bronchodilator FEV1/FVC ratio less than 0.90",
+      "Post-bronchodilator FVC greater than 100% predicted",
+      "An isolated reduction in peak expiratory flow rate only"
+    ],
+    "answer": 0,
+    "e": "A post-bronchodilator FEV1/FVC ratio under 0.70 is the defining spirometric criterion confirming persistent airflow limitation in COPD."
+  },
+  {
+    "q": "According to the GOLD spirometric grading, a post-bronchodilator FEV1 of 65% predicted corresponds to which grade?",
+    "options": [
+      "GOLD 2: moderate",
+      "GOLD 1: mild",
+      "GOLD 3: severe",
+      "GOLD 4: very severe"
+    ],
+    "answer": 0,
+    "e": "GOLD 2 (moderate) spans FEV1 50–79% predicted, which 65% falls within; GOLD 1 is ≥80%, GOLD 3 is 30–49%, and GOLD 4 is <30%."
+  },
+  {
+    "q": "A patient's post-bronchodilator FEV1 is 28% of predicted. What GOLD spirometric grade does this represent?",
+    "options": [
+      "GOLD 4: very severe",
+      "GOLD 3: severe",
+      "GOLD 2: moderate",
+      "GOLD 1: mild"
+    ],
+    "answer": 0,
+    "e": "An FEV1 below 30% predicted meets criteria for GOLD 4 (very severe), the most advanced spirometric grade."
+  },
+  {
+    "q": "At initial diagnosis of confirmed COPD, which laboratory test should be performed in every patient, regardless of age or smoking status?",
+    "options": [
+      "Serum alpha-1 antitrypsin level",
+      "Serum IgE level",
+      "Peripheral eosinophil count only in nonsmokers",
+      "ANA and rheumatoid factor"
+    ],
+    "answer": 0,
+    "e": "All patients with confirmed COPD should be screened for alpha-1 antitrypsin deficiency at initial diagnosis, not just those with a suggestive phenotype."
+  },
+  {
+    "q": "On body plethysmography, which volumes are characteristically increased in COPD, reflecting air trapping?",
+    "options": [
+      "Total lung capacity, functional residual capacity, and residual volume",
+      "Only vital capacity, with all other volumes normal",
+      "Only tidal volume, with static volumes unchanged",
+      "Inspiratory reserve volume exclusively"
+    ],
+    "answer": 0,
+    "e": "Air trapping in COPD increases TLC, FRC, and RV on body plethysmography, reflecting the hyperinflated state of the lungs."
+  },
+  {
+    "q": "A patient with COPD has a markedly reduced DLCO. Which COPD phenotype does this finding suggest, and why?",
+    "options": [
+      "Emphysema, because alveolar wall and capillary destruction reduces the surface area for gas diffusion",
+      "Chronic bronchitis, because mucus plugging blocks the diffusion pathway",
+      "Neither phenotype, since DLCO is not affected in COPD",
+      "Asthma-COPD overlap exclusively, never pure COPD"
+    ],
+    "answer": 0,
+    "e": "A reduced DLCO points toward emphysema, since destruction of alveolar walls and their capillary beds directly reduces the surface area available for gas diffusion; chronic bronchitis typically preserves a normal DLCO."
+  },
+  {
+    "q": "After bronchodilator administration, a change in FEV1 of less than 12% is described as:",
+    "options": [
+      "A negative response, more common in COPD than in asthma",
+      "A positive response, ruling out COPD entirely",
+      "Diagnostic of asthma rather than COPD",
+      "Seen equally often in both COPD and asthma"
+    ],
+    "answer": 0,
+    "e": "A negative post-bronchodilator response (FEV1 change <12%) is more characteristic of COPD's largely fixed airflow limitation, in contrast to asthma's typically greater reversibility."
+  },
+  {
+    "q": "On the diagnostic algorithm, an ECG finding of right axis deviation and right ventricular hypertrophy in a COPD patient reflects which underlying process?",
+    "options": [
+      "Chronic pulmonary hypertension leading to right heart strain",
+      "Left ventricular hypertrophy from systemic hypertension",
+      "An acute anterior myocardial infarction",
+      "A primary conduction system disease unrelated to the lungs"
+    ],
+    "answer": 0,
+    "e": "Right axis deviation and RVH on ECG reflect the right heart strain from chronic pulmonary hypertension (a consequence of long-standing hypoxemic vasoconstriction) — part of the cor pulmonale pathway."
+  },
+  {
+    "q": "What is the key limitation of chest X-ray in the workup of COPD, according to the notes?",
+    "options": [
+      "It has low sensitivity in COPD and typically only shows abnormalities in advanced disease",
+      "It is entirely useless and should never be ordered in COPD",
+      "It is more sensitive than spirometry for early COPD detection",
+      "It is contraindicated in COPD patients due to radiation risk"
+    ],
+    "answer": 0,
+    "e": "CXR has low sensitivity in COPD, typically only revealing abnormalities (hyperinflation, flattened diaphragm) in advanced disease — its main practical use is ruling out complications like pneumonia or pneumothorax during an exacerbation."
+  },
+  {
+    "q": "Alpha-1 antitrypsin deficiency should be specifically suspected and screened for when a COPD patient has which combination of features?",
+    "options": [
+      "Young age, liver disease, and panlobular (panacinar) emphysema",
+      "Older age, normal liver function, and centrilobular emphysema only",
+      "A long smoking history with normal spirometry",
+      "Isolated chronic bronchitis without any emphysema"
+    ],
+    "answer": 0,
+    "e": "The classic trigger for AATD screening is young age at COPD onset, coexisting liver disease (since AATD also causes hepatic injury), and panlobular/panacinar emphysema pattern."
+  },
+  {
+    "q": "On pulmonary function testing, which pattern of FEV1, FEV1/FVC, and residual volume is characteristic of an obstructive process like COPD?",
+    "options": [
+      "Low FEV1, low FEV1/FVC ratio, and high residual volume",
+      "Normal or slightly low FEV1, normal or high FEV1/FVC ratio, and low residual volume",
+      "High FEV1, normal FEV1/FVC ratio, and normal residual volume",
+      "Low FEV1 with high FEV1/FVC ratio and low residual volume"
+    ],
+    "answer": 0,
+    "e": "Obstructive disease shows a low FEV1 with a disproportionately low FEV1/FVC ratio (since FVC is relatively preserved) and elevated residual volume from air trapping — the opposite pattern from restrictive disease."
+  },
+  {
+    "q": "How does total lung capacity typically differ between obstructive and restrictive lung disease?",
+    "options": [
+      "High in obstructive disease; low in restrictive disease",
+      "Low in obstructive disease; high in restrictive disease",
+      "Normal in both conditions",
+      "High in both conditions equally"
+    ],
+    "answer": 0,
+    "e": "TLC is increased in obstructive disease (air trapping/hyperinflation) but decreased in restrictive disease (reduced lung volumes from fibrosis or chest wall limitation)."
+  },
+  {
+    "q": "What combination of TLC and FEV1 findings is required to diagnose airway obstruction, per the notes?",
+    "options": [
+      "Normal or increased TLC with a decreased FEV1",
+      "Decreased TLC with a decreased FEV1",
+      "Increased TLC with a normal or increased FEV1",
+      "Decreased TLC with a normal FEV1"
+    ],
+    "answer": 0,
+    "e": "The notes specifically state that diagnosing airway obstruction requires a normal or increased TLC together with a decreased FEV1 — distinguishing it from restrictive disease, where TLC is also decreased."
+  },
+  {
+    "q": "In the refined ABCD assessment tool, what two variables determine whether a patient falls into the 'C/D' versus 'A/B' category?",
+    "options": [
+      "Moderate-or-severe exacerbation history (≥2, or ≥1 leading to hospitalization, vs. 0–1 not leading to hospitalization)",
+      "Serum eosinophil count alone",
+      "FEV1 percentage predicted alone",
+      "Age and smoking pack-years alone"
+    ],
+    "answer": 0,
+    "e": "The vertical split into C/D versus A/B is based on exacerbation history: ≥2 moderate/severe exacerbations or ≥1 leading to hospitalization places a patient in C/D, while 0–1 without hospitalization places them in A/B."
+  },
+  {
+    "q": "Within the A/B or C/D exacerbation categories, what further distinguishes group A from B (or C from D)?",
+    "options": [
+      "Symptom burden, based on mMRC score and CAT score",
+      "Post-bronchodilator FEV1 percentage predicted",
+      "Presence or absence of alpha-1 antitrypsin deficiency",
+      "DLCO value"
+    ],
+    "answer": 0,
+    "e": "Within each exacerbation-risk tier, symptom burden (mMRC ≥2 or CAT ≥10 versus mMRC 0–1 or CAT <10) determines the horizontal split (A vs B, or C vs D)."
+  },
+  {
+    "q": "A patient with 0–1 exacerbations not leading to hospitalization and an mMRC score of 3 would be classified into which GOLD group?",
+    "options": [
+      "Group B",
+      "Group A",
+      "Group C",
+      "Group D"
+    ],
+    "answer": 0,
+    "e": "Low exacerbation risk (0–1, no hospitalization) places the patient in the A/B tier; an mMRC ≥2 places them specifically in Group B (higher symptom burden)."
+  },
+  {
+    "q": "A patient with 2 moderate exacerbations in the past year and an mMRC score of 1 would be classified into which GOLD group?",
+    "options": [
+      "Group C",
+      "Group A",
+      "Group B",
+      "Group D"
+    ],
+    "answer": 0,
+    "e": "Two exacerbations places the patient in the higher-risk C/D tier; an mMRC of 1 (below the ≥2 threshold) places them specifically in Group C (lower symptom burden within that tier)."
+  },
+  {
+    "q": "In the classic ABCD initial pharmacological treatment scheme, what is the recommended initial therapy for Group A?",
+    "options": [
+      "A bronchodilator",
+      "LAMA specifically, with no alternative",
+      "ICS + LABA combination",
+      "Triple therapy with ICS + LAMA + LABA"
+    ],
+    "answer": 0,
+    "e": "Group A (low symptom burden, low exacerbation risk) is treated with a bronchodilator (either short- or long-acting), the least intensive initial option."
+  },
+  {
+    "q": "In the classic ABCD initial pharmacological scheme, Group C is specifically started on which single agent?",
+    "options": [
+      "LAMA",
+      "A short-acting bronchodilator only",
+      "ICS monotherapy",
+      "LABA plus ICS"
+    ],
+    "answer": 0,
+    "e": "Group C (high exacerbation risk, low symptom burden) is specifically started on a LAMA as initial therapy, per the classic ABCD treatment scheme shown."
+  },
+  {
+    "q": "In the newer GOLD ABE grouping algorithm, Group E is specifically defined by which criterion, and what does it prompt considering if eosinophils are ≥300 cells/µL?",
+    "options": [
+      "≥2 exacerbations or ≥1 with hospitalization; consider LAMA/LABA/ICS triple therapy",
+      "0–1 exacerbations without hospitalization; consider LAMA monotherapy",
+      "An mMRC score of exactly 2; consider stopping all bronchodilators",
+      "A CAT score under 10; consider adding oral corticosteroids"
+    ],
+    "answer": 0,
+    "e": "Group E is defined purely by high exacerbation burden (≥2 overall, or ≥1 with hospitalization); if eosinophils are ≥300 cells/µL, triple LAMA/LABA/ICS therapy should be considered instead of LAMA/LABA alone."
+  },
+  {
+    "q": "In the newer ABE grouping, how does initial treatment for Group A differ from Group B?",
+    "options": [
+      "Group A receives a single bronchodilator (LABA or LAMA); Group B receives LABA/LAMA combination therapy",
+      "Group A receives triple therapy; Group B receives a single bronchodilator",
+      "Both groups receive identical triple therapy",
+      "Group A receives ICS alone; Group B receives LAMA alone"
+    ],
+    "answer": 0,
+    "e": "In the ABE scheme, Group A (lower symptom burden) is treated with a single bronchodilator (LABA or LAMA), while Group B (higher symptom burden) receives LABA/LAMA combination therapy — both groups share the same low exacerbation risk."
+  },
+  {
+    "q": "According to the lecture, what general principle governs when inhaled corticosteroids should be used in COPD?",
+    "options": [
+      "ICS should only be used in combination with a long-acting bronchodilator, not as monotherapy",
+      "ICS should always be used first-line as monotherapy in every COPD patient",
+      "ICS is contraindicated in all COPD patients regardless of phenotype",
+      "ICS should be used only during stable disease, never during exacerbations"
+    ],
+    "answer": 0,
+    "e": "The lecture explicitly states ICS should only be used in combination with long-acting bronchodilators in COPD, never as standalone monotherapy."
+  },
+  {
+    "q": "Which patient subgroup derives the most benefit from adding inhaled corticosteroids to COPD therapy?",
+    "options": [
+      "Patients with serum eosinophils greater than 300 cells/µL",
+      "Patients with serum eosinophils less than 50 cells/µL",
+      "Patients with a normal DLCO regardless of eosinophil count",
+      "Patients with alpha-1 antitrypsin deficiency exclusively"
+    ],
+    "answer": 0,
+    "e": "ICS is most useful in patients with serum eosinophils above 300 cells/µL, a biomarker predicting a more robust anti-inflammatory response."
+  },
+  {
+    "q": "According to the notes, what is a notable risk associated with inhaled corticosteroid use in COPD, despite its anti-inflammatory intent?",
+    "options": [
+      "Increased rates of pulmonary infection, with many studies failing to show meaningful pulmonary function benefit",
+      "Accelerated FEV1 decline compared to placebo",
+      "Universal worsening of eosinophilic inflammation",
+      "Immediate bronchoconstriction in all patients"
+    ],
+    "answer": 0,
+    "e": "The notes specifically flag that ICS may increase rates of pulmonary infection, and that many studies have failed to demonstrate a clear pulmonary function benefit, despite minimally slowing FEV1 decline in some analyses."
+  },
+  {
+    "q": "Which two interventions are described as the only ones shown to consistently lower mortality in COPD?",
+    "options": [
+      "Smoking cessation and home (long-term) oxygen therapy",
+      "Inhaled corticosteroids and antibiotics",
+      "Pulmonary rehabilitation and PDE4 inhibitors",
+      "Roflumilast and azithromycin"
+    ],
+    "answer": 0,
+    "e": "Per the Quick HIT in the notes, smoking cessation and home oxygen therapy are the only interventions consistently shown to lower mortality in COPD."
+  },
+  {
+    "q": "What is the single most effective intervention to slow the progression of COPD?",
+    "options": [
+      "Smoking cessation",
+      "Inhaled corticosteroid therapy",
+      "Pulmonary rehabilitation",
+      "Annual influenza vaccination"
+    ],
+    "answer": 0,
+    "e": "Smoking cessation is repeatedly emphasized as the single most effective step to slow the decline in lung function in COPD patients."
+  },
+  {
+    "q": "What is the recommended influenza vaccination schedule for COPD patients?",
+    "options": [
+      "Annually for all patients",
+      "Once every 5 years",
+      "Only during a confirmed influenza outbreak",
+      "Only for patients over age 65"
+    ],
+    "answer": 0,
+    "e": "Influenza vaccination is recommended annually for all COPD patients, regardless of age or disease severity."
+  },
+  {
+    "q": "What is the recommended pneumococcal vaccination schedule for adult COPD patients?",
+    "options": [
+      "Once before age 65, then once again after age 65, regardless of age at COPD diagnosis",
+      "Only once in a lifetime, at any age",
+      "Only if the patient has never smoked",
+      "Every year, identical to the influenza vaccine schedule"
+    ],
+    "answer": 0,
+    "e": "Pneumococcal vaccination should be offered to all adult COPD patients regardless of age: once before age 65, and again once after age 65."
+  },
+  {
+    "q": "What duration of daily oxygen use is required for continuous oxygen therapy to reduce mortality in COPD, per the notes?",
+    "options": [
+      "At least 18 hours per day",
+      "At least 2 hours per day",
+      "Only during sleep, regardless of total hours",
+      "Only during physical exertion"
+    ],
+    "answer": 0,
+    "e": "The notes specify that continuous oxygen therapy for ≥18 hours per day has been shown to reduce mortality by controlling pulmonary hypertension in patients with long-standing hypoxemia."
+  },
+  {
+    "q": "According to the main lecture's LTOT criteria, a PaO2 below what threshold indicates a need for long-term oxygen therapy regardless of PaCO2?",
+    "options": [
+      "7.3 kPa (55 mmHg)",
+      "10 kPa (75 mmHg)",
+      "5 kPa (37 mmHg)",
+      "9 kPa (68 mmHg)"
+    ],
+    "answer": 0,
+    "e": "A PaO2 below 7.3 kPa (55 mmHg) indicates severe hypoxemia warranting LTOT regardless of PaCO2, due to the elevated risk of pulmonary hypertension and right heart failure."
+  },
+  {
+    "q": "A COPD patient has a PaO2 of 7.6 kPa (57 mmHg) — above the automatic LTOT threshold. Under what additional circumstances should LTOT still be prescribed?",
+    "options": [
+      "If the patient has pulmonary hypertension, peripheral edema (right heart failure), or nocturnal hypoxemia",
+      "Only if the patient requests it directly",
+      "Only if FEV1 is above 80% predicted",
+      "LTOT should never be prescribed at this PaO2 level regardless of other findings"
+    ],
+    "answer": 0,
+    "e": "For PaO2 in the 7.3–8 kPa (55–60 mmHg) range, LTOT is still indicated if the patient has pulmonary hypertension, peripheral edema/right heart failure, or nocturnal oxygen desaturation."
+  },
+  {
+    "q": "Before prescribing LTOT, how should arterial blood gases be assessed to confirm eligibility?",
+    "options": [
+      "Measured in a clinically stable patient on optimal medical therapy on at least two occasions 3 weeks apart",
+      "Measured once during an acute exacerbation only",
+      "Measured only via pulse oximetry, never arterial sampling",
+      "Measured immediately after smoking cessation, with no waiting period"
+    ],
+    "answer": 0,
+    "e": "LTOT eligibility requires ABGs measured on at least two occasions 3 weeks apart in a clinically stable patient on optimal therapy, ensuring the hypoxemia is persistent rather than transient."
+  },
+  {
+    "q": "What target PaO2 should long-term oxygen therapy aim to achieve, and at what typical flow rate?",
+    "options": [
+      "PaO2 greater than 8 kPa (60 mmHg), using a flow rate of 2–4 L/min",
+      "PaO2 greater than 15 kPa (110 mmHg), using a flow rate of 10 L/min",
+      "PaO2 exactly equal to room-air baseline, using a flow rate of 1 L/min",
+      "No specific PaO2 target; only SpO2 of 100% is targeted"
+    ],
+    "answer": 0,
+    "e": "LTOT targets a PaO2 above 8 kPa (60 mmHg) using a flow rate of 2–4 L/min, providing adequate tissue oxygenation without inducing hypercapnia."
+  },
+  {
+    "q": "According to the notes, what SpO2 threshold, combined with polycythemia, supports LTOT eligibility?",
+    "options": [
+      "SpO2 below 90% with evidence of polycythemia or cor pulmonale",
+      "SpO2 below 99% with a normal hematocrit",
+      "SpO2 below 95% regardless of any other findings",
+      "SpO2 exactly 92% with no additional criteria"
+    ],
+    "answer": 0,
+    "e": "The notes list SpO2 below 90% together with polycythemia (or evidence of cor pulmonale) as a specific criterion supporting continuous or intermittent LTOT."
+  },
+  {
+    "q": "Bullectomy is considered in which specific clinical scenario?",
+    "options": [
+      "When large bullae compress surrounding normal lung tissue",
+      "In any patient with mild, stable COPD regardless of imaging findings",
+      "As first-line therapy before any pharmacological treatment",
+      "Only in patients with chronic bronchitis, never emphysema"
+    ],
+    "answer": 0,
+    "e": "Bullectomy is indicated when large bullae compress adjacent normal lung parenchyma, aiming to improve function of the compressed but otherwise healthy lung tissue."
+  },
+  {
+    "q": "Lung volume reduction surgery is most appropriate for which patient profile?",
+    "options": [
+      "Predominantly upper lobe emphysema with preserved gas transfer and no pulmonary hypertension",
+      "Predominantly lower lobe emphysema with severely reduced gas transfer",
+      "Any patient with GOLD 1 mild disease",
+      "Patients with significant pulmonary hypertension as the dominant feature"
+    ],
+    "answer": 0,
+    "e": "LVRS is indicated for patients with predominantly upper lobe emphysema, preserved gas transfer (DLCO), and no evidence of pulmonary hypertension — a fairly specific and select population."
+  },
+  {
+    "q": "Which class of drug is roflumilast, and in which patients is it most useful?",
+    "options": [
+      "A phosphodiesterase-4 inhibitor, used in patients with severe or very severe COPD to reduce moderate-to-severe exacerbations",
+      "A leukotriene receptor antagonist, used in mild COPD",
+      "An inhaled anticholinergic, used as first-line rescue therapy",
+      "A mucolytic, used to thin airway secretions acutely"
+    ],
+    "answer": 0,
+    "e": "Roflumilast is a PDE4 inhibitor that improves lung function and reduces exacerbations specifically in patients with severe or very severe COPD."
+  },
+  {
+    "q": "Before starting azithromycin prophylaxis to reduce COPD exacerbations, which infection must first be excluded, and what monitoring is required?",
+    "options": [
+      "Non-tuberculous mycobacterial infection; monitor LFTs, QTc, and hearing",
+      "Active pulmonary tuberculosis only; no further monitoring needed",
+      "HIV infection; monitor CD4 count",
+      "Aspergillus colonization; monitor serum galactomannan"
+    ],
+    "answer": 0,
+    "e": "Non-tuberculous mycobacterial infection must be excluded before starting chronic azithromycin (since inadequate monotherapy could promote resistance), and LFTs, QTc, and hearing should be monitored given macrolide toxicity risks."
+  },
+  {
+    "q": "Why should maintenance (long-term) oral glucocorticoid therapy generally be avoided in stable COPD, despite being useful during exacerbations?",
+    "options": [
+      "It contributes to osteoporosis and impaired skeletal muscle function with chronic use",
+      "It has no anti-inflammatory effect in the lungs at any dose",
+      "It paradoxically worsens airflow obstruction acutely",
+      "It is more expensive than all other COPD therapies combined"
+    ],
+    "answer": 0,
+    "e": "While useful for acute exacerbations, maintenance oral glucocorticoids carry a long-term risk of osteoporosis and skeletal muscle dysfunction, so should be avoided as ongoing therapy."
+  },
+  {
+    "q": "What defines 'long-standing partial respiratory failure' as a complication of COPD?",
+    "options": [
+      "PO2 at rest under 60 mmHg, without significant CO2 retention",
+      "PO2 and PCO2 both normal at rest",
+      "PCO2 under 45 mmHg with normal PO2",
+      "PO2 over 80 mmHg with elevated PCO2"
+    ],
+    "answer": 0,
+    "e": "Long-standing partial respiratory failure is defined by PO2 at rest below 60 mmHg, representing isolated hypoxemic (Type 1) respiratory insufficiency in advanced COPD."
+  },
+  {
+    "q": "What additional criterion distinguishes 'global respiratory insufficiency' from partial respiratory failure in advanced COPD?",
+    "options": [
+      "PCO2 greater than 45 mmHg in addition to PO2 under 60 mmHg",
+      "A normal PCO2 with a markedly low PO2 only",
+      "An elevated pH with normal PO2 and PCO2",
+      "A normal PO2 with mild PCO2 elevation"
+    ],
+    "answer": 0,
+    "e": "Global respiratory insufficiency (Type 2 failure) requires both PO2 under 60 mmHg AND PCO2 over 45 mmHg, reflecting combined oxygenation and ventilatory failure from progressive loss of diffusion surface area."
+  },
+  {
+    "q": "Secondary spontaneous pneumothorax in COPD most commonly results from which mechanism?",
+    "options": [
+      "Rupture of a bulla, especially in bullous emphysema",
+      "Direct trauma to the chest wall",
+      "Infectious erosion of the pleura by tuberculosis",
+      "Iatrogenic injury during routine spirometry"
+    ],
+    "answer": 0,
+    "e": "Secondary spontaneous pneumothorax in COPD classically results from rupture of a bulla, particularly in patients with bullous emphysema."
+  },
+  {
+    "q": "In the pathway from chronic COPD to cor pulmonale, chronic hypoxemia stimulates increased production of which hormone, contributing to secondary polycythemia?",
+    "options": [
+      "Erythropoietin",
+      "Renin",
+      "Aldosterone",
+      "Antidiuretic hormone"
+    ],
+    "answer": 0,
+    "e": "Chronic hypoxemia stimulates renal erythropoietin production, driving increased red blood cell production (secondary polycythemia) — a compensatory but ultimately maladaptive response contributing to increased blood viscosity."
+  },
+  {
+    "q": "What is the underlying mechanistic chain linking chronic hypoxemia to right heart failure in COPD?",
+    "options": [
+      "Chronic hypoxemia → pulmonary vascular resistance rises → pulmonary hypertension → right ventricular strain → right heart failure",
+      "Chronic hypoxemia directly weakens the left ventricle, causing left heart failure first",
+      "Chronic hypercapnia alone causes right heart failure independent of any vascular changes",
+      "Polycythemia alone, without any vascular change, causes right heart failure"
+    ],
+    "answer": 0,
+    "e": "Chronic hypoxemic pulmonary vasoconstriction raises pulmonary vascular resistance, producing pulmonary hypertension that strains and eventually fails the right ventricle (cor pulmonale)."
+  },
+  {
+    "q": "What is the most common viral trigger of an acute COPD exacerbation?",
+    "options": [
+      "Rhinovirus",
+      "SARS-CoV-2",
+      "Influenza",
+      "Respiratory syncytial virus"
+    ],
+    "answer": 0,
+    "e": "Rhinovirus is specifically identified as the most common viral trigger of AECOPD, ahead of SARS-CoV-2, influenza, RSV, parainfluenza, metapneumovirus, and adenovirus."
+  },
+  {
+    "q": "Which bacterial organisms are classically implicated in acute COPD exacerbations?",
+    "options": [
+      "Haemophilus influenzae, Streptococcus pneumoniae, and Moraxella catarrhalis",
+      "Pseudomonas aeruginosa exclusively, regardless of severity",
+      "Staphylococcus aureus exclusively",
+      "Mycobacterium tuberculosis exclusively"
+    ],
+    "answer": 0,
+    "e": "The three classic bacterial pathogens implicated in AECOPD are H. influenzae, S. pneumoniae, and M. catarrhalis."
+  },
+  {
+    "q": "Besides infection and environmental factors, which cardiovascular condition is listed as a possible trigger of AECOPD?",
+    "options": [
+      "Pulmonary embolism",
+      "Aortic dissection",
+      "Infective endocarditis",
+      "Constrictive pericarditis"
+    ],
+    "answer": 0,
+    "e": "Pulmonary embolism, along with heart failure and medication non-adherence, is listed among the non-infectious causes of AECOPD."
+  },
+  {
+    "q": "A change in sputum color to purulent during a COPD exacerbation is a clinical clue suggesting which underlying process?",
+    "options": [
+      "Bacterial infection",
+      "Pure viral infection without bacterial involvement",
+      "Pulmonary embolism specifically",
+      "Heart failure specifically"
+    ],
+    "answer": 0,
+    "e": "Purulent sputum (change in color) is a marker suggesting bacterial infection as the trigger, and is one of the criteria used to decide whether antibiotics are indicated."
+  },
+  {
+    "q": "Which set of signs points toward hypercapnia during an AECOPD, as opposed to hypoxemia alone?",
+    "options": [
+      "Confusion, drowsiness, and flapping tremor",
+      "Cyanosis and tachypnea only",
+      "Wheezing and chest tightness only",
+      "Increased sputum volume alone"
+    ],
+    "answer": 0,
+    "e": "Confusion, drowsiness, and flapping tremor (asterixis) are the classic signs of hypercapnia during an exacerbation, distinct from the hypoxemia-driven signs of cyanosis and low SpO2."
+  },
+  {
+    "q": "Is spirometry recommended during an acute COPD exacerbation?",
+    "options": [
+      "No, spirometry is not performed during exacerbations",
+      "Yes, it should be performed urgently in every exacerbation",
+      "Yes, but only to confirm the GOLD grade before any treatment is given",
+      "No, spirometry is replaced entirely by chest CT during exacerbations"
+    ],
+    "answer": 0,
+    "e": "Spirometry is explicitly not done during exacerbations, since acute symptoms and bronchospasm make results unreliable; it is reserved for stable-state assessment."
+  },
+  {
+    "q": "What is the primary purpose of obtaining a chest X-ray during an AECOPD?",
+    "options": [
+      "To exclude complications such as pneumonia or pneumothorax",
+      "To directly measure the FEV1/FVC ratio",
+      "To calculate the DLCO",
+      "To diagnose alpha-1 antitrypsin deficiency"
+    ],
+    "answer": 0,
+    "e": "CXR during an exacerbation is used to exclude complications like pneumonia or pneumothorax, rather than to assess baseline COPD severity (which CXR does poorly, as noted elsewhere)."
+  },
+  {
+    "q": "An ABG obtained during an AECOPD shows respiratory acidosis. What does this specifically indicate?",
+    "options": [
+      "Ventilatory failure",
+      "Adequate compensation with no ventilatory compromise",
+      "A purely metabolic process unrelated to ventilation",
+      "Resolution of the exacerbation"
+    ],
+    "answer": 0,
+    "e": "Respiratory acidosis (falling pH, rising CO2) on ABG during an exacerbation indicates ventilatory failure — the patient can no longer adequately clear CO2."
+  },
+  {
+    "q": "During an AECOPD, controlled oxygen therapy should aim to maintain PaO2 above what level while specifically avoiding which complication?",
+    "options": [
+      "Above 8 kPa (60 mmHg), avoiding worsening acidosis",
+      "Above 15 kPa (110 mmHg), avoiding hypocapnia",
+      "Above 5 kPa (37 mmHg), avoiding hypertension",
+      "There is no specific PaO2 target during an exacerbation"
+    ],
+    "answer": 0,
+    "e": "Controlled oxygen (e.g., 24–28%) during AECOPD targets a PaO2 above 8 kPa (60 mmHg) or SaO2 above 90%, while carefully avoiding worsening of respiratory acidosis from oxygen-induced hypercapnia."
+  },
+  {
+    "q": "Which combination of nebulized bronchodilators is recommended during an AECOPD?",
+    "options": [
+      "A short-acting beta-2 agonist combined with an anticholinergic (e.g., salbutamol and ipratropium)",
+      "A long-acting beta-2 agonist alone, without any anticholinergic",
+      "An inhaled corticosteroid alone, without any bronchodilator",
+      "Theophylline alone, without any nebulized agent"
+    ],
+    "answer": 0,
+    "e": "Nebulized short-acting beta-2 agonists combined with an anticholinergic (salbutamol plus ipratropium) is the recommended bronchodilator combination during an exacerbation."
+  },
+  {
+    "q": "What is a typical dose and duration for oral prednisolone during an AECOPD?",
+    "options": [
+      "30 mg daily for approximately 10 days, though shorter courses may be acceptable",
+      "5 mg daily for 6 months continuously",
+      "500 mg as a single one-time dose",
+      "30 mg daily indefinitely as maintenance therapy"
+    ],
+    "answer": 0,
+    "e": "Oral prednisolone 30 mg for around 10 days is the commonly cited regimen during an exacerbation, though evidence supports that shorter courses may be equally effective."
+  },
+  {
+    "q": "According to the lecture, which three clinical features should prompt consideration of antibiotic therapy during an AECOPD?",
+    "options": [
+      "Increased sputum purulence, increased sputum volume, or increased breathlessness/fever",
+      "A normal chest X-ray with no other symptoms",
+      "Isolated mild cough without any other change",
+      "A CAT score below 10 with stable symptoms"
+    ],
+    "answer": 0,
+    "e": "Antibiotics are recommended for patients reporting increased sputum purulence, increased sputum volume, or increased breathlessness (with or without fever) — not for exacerbations without these features."
+  },
+  {
+    "q": "When is co-amoxiclav specifically preferred over simpler antibiotic regimens (aminopenicillin, tetracycline, or macrolide) for AECOPD?",
+    "options": [
+      "In regions where beta-lactamase-producing organisms are common",
+      "In every case of AECOPD, regardless of local resistance patterns",
+      "Only in patients with confirmed viral infection",
+      "Only in patients who have never received antibiotics before"
+    ],
+    "answer": 0,
+    "e": "Co-amoxiclav is reserved for regions with known high prevalence of beta-lactamase-producing organisms; otherwise, simpler regimens are advised as first-line."
+  },
+  {
+    "q": "Non-invasive ventilation during AECOPD is specifically indicated for which acid-base and pH criteria?",
+    "options": [
+      "Mild to moderate respiratory acidosis, with pH under 7.35",
+      "Any degree of hypoxemia regardless of pH or CO2",
+      "Metabolic alkalosis with a normal pH",
+      "Only when pH has already fallen below 7.00"
+    ],
+    "answer": 0,
+    "e": "NIV is indicated for AECOPD complicated by mild-to-moderate respiratory acidosis (H+ ≥45 nmol/L, pH <7.35), and should be considered early to reduce the need for intubation."
+  },
+  {
+    "q": "In which specific patient population is non-invasive ventilation NOT useful during an AECOPD?",
+    "options": [
+      "Patients who cannot protect their airway",
+      "Patients with mild respiratory acidosis and intact mental status",
+      "Patients with pH between 7.30 and 7.35",
+      "Patients being treated for the first time with NIV"
+    ],
+    "answer": 0,
+    "e": "NIV is not useful in patients who cannot protect their own airway (e.g., due to altered consciousness or vomiting risk), who instead require invasive airway management."
+  },
+  {
+    "q": "When is invasive mechanical ventilation specifically considered in AECOPD, according to the lecture?",
+    "options": [
+      "When there is a reversible cause for deterioration (e.g., pneumonia) or no prior history of respiratory failure",
+      "In every single patient presenting with an exacerbation, as first-line therapy",
+      "Only in patients who refuse NIV for personal reasons",
+      "Never, since NIV always supersedes invasive ventilation in COPD"
+    ],
+    "answer": 0,
+    "e": "Mechanical ventilation is contemplated specifically when there's a reversible precipitant (like pneumonia) or the patient has no prior history of respiratory failure — factors suggesting a good chance of successful liberation from the ventilator."
+  },
+  {
+    "q": "Why must intravenous aminophylline be used cautiously during AECOPD despite historical popularity?",
+    "options": [
+      "Evidence for benefit is limited, and it carries a risk of arrhythmias and drug interactions",
+      "It has been definitively proven superior to nebulized bronchodilators",
+      "It has no cardiac risk profile whatsoever",
+      "It is now considered completely obsolete with zero clinical role"
+    ],
+    "answer": 0,
+    "e": "IV aminophylline's evidence base is limited, and it carries meaningful risks of arrhythmia and drug interactions, so it requires careful monitoring when used."
+  },
+  {
+    "q": "The respiratory stimulant doxapram has been largely replaced by which modern therapy, though it may still have a role in select patients?",
+    "options": [
+      "Non-invasive ventilation (NIV)",
+      "Long-term oxygen therapy",
+      "Roflumilast",
+      "Azithromycin prophylaxis"
+    ],
+    "answer": 0,
+    "e": "Doxapram has been largely superseded by NIV, though it may still have a limited role in selected patients with a low respiratory rate."
+  },
+  {
+    "q": "What is the target SpO2 range during oxygen therapy for an AECOPD, and why is a Venturi mask generally preferred over a standard nasal cannula?",
+    "options": [
+      "88–92%; a Venturi mask delivers a more precisely controlled FiO2",
+      "94–98%; a Venturi mask is more comfortable for the patient",
+      "100%; a Venturi mask delivers higher flow rates than any other device",
+      "There is no specific target; oxygen is titrated purely by symptoms"
+    ],
+    "answer": 0,
+    "e": "The target SpO2 range is 88–92%, and a Venturi mask is preferred because it delivers a more precise, controlled FiO2 — important for avoiding oxygen-induced hypercapnia in CO2 retainers."
+  },
+  {
+    "q": "Which two physiologic mechanisms explain why excessive supplemental oxygen can worsen hypercapnia in a COPD patient?",
+    "options": [
+      "Worsening V/Q mismatch from pulmonary vasodilation in poorly ventilated areas, and blunting of the hypoxic respiratory drive",
+      "Direct suppression of the medullary chemoreceptors by oxygen molecules themselves",
+      "Increased minute ventilation from oxygen-induced tachypnea",
+      "Oxygen-induced bronchospasm reducing overall ventilation"
+    ],
+    "answer": 0,
+    "e": "High-flow oxygen can dilate pulmonary vessels in poorly ventilated areas (worsening V/Q mismatch and reducing gas exchange efficiency) and can blunt the hypoxic drive that some chronic CO2 retainers rely on for ventilatory stimulation."
+  },
+  {
+    "q": "Peripheral edema developing during an AECOPD typically responds to which treatment?",
+    "options": [
+      "Diuretics",
+      "High-dose inhaled corticosteroids",
+      "Increased bronchodilator frequency alone",
+      "Oral antihistamines"
+    ],
+    "answer": 0,
+    "e": "Peripheral edema accompanying an exacerbation (often reflecting right heart strain) usually responds to diuretic therapy."
+  },
+  {
+    "q": "A 62-year-old smoker with known COPD presents with a resting PaO2 of 52 mmHg and PaCO2 of 58 mmHg. Repeat ABGs 3 weeks later on optimal therapy show similar values, and he has quit smoking. What is the most appropriate next step?",
+    "options": [
+      "Prescribe long-term oxygen therapy for at least 18 hours daily",
+      "Withhold oxygen therapy since his PaCO2 is also elevated",
+      "Prescribe oxygen only during exercise, with no use at rest",
+      "Delay any oxygen decision until FEV1 improves to normal"
+    ],
+    "answer": 0,
+    "e": "A PaO2 persistently below 55 mmHg on two occasions 3 weeks apart in a patient who has quit smoking meets criteria for LTOT regardless of PaCO2, and should be used for at least 18 hours daily to reduce mortality."
+  },
+  {
+    "q": "A COPD patient's spirometry shows a markedly reduced DLCO along with air trapping. Chest CT shows destructive changes predominantly in the lower lung zones, and he has a strong family history of early liver disease. What underlying condition should be specifically screened for?",
+    "options": [
+      "Alpha-1 antitrypsin deficiency",
+      "Cystic fibrosis",
+      "Primary ciliary dyskinesia",
+      "Idiopathic pulmonary fibrosis"
+    ],
+    "answer": 0,
+    "e": "Lower-zone-predominant (panacinar) emphysema with a family history of liver disease is the classic trigger to screen for alpha-1 antitrypsin deficiency, which affects both the lungs and liver."
+  },
+  {
+    "q": "A patient with severe COPD (FEV1 35% predicted) has had 3 moderate exacerbations this year, one requiring hospitalization, and reports being breathless walking to the bathroom (mMRC 3). Using the refined ABCD tool, which group does he belong to, and what would the newer ABE tool call this same group?",
+    "options": [
+      "Group D by ABCD; Group E by the newer ABE system",
+      "Group A by ABCD; Group A by the newer ABE system",
+      "Group C by ABCD; Group B by the newer ABE system",
+      "Group B by ABCD; Group E by the newer ABE system"
+    ],
+    "answer": 0,
+    "e": "High exacerbation burden (≥2, with hospitalization) plus high symptom burden (mMRC ≥2) makes him Group D under the classic ABCD scheme; under the newer ABE scheme, exacerbation burden alone (without the symptom split) places any such high-risk patient in Group E."
+  },
+  {
+    "q": "A COPD patient on LABA/LAMA combination therapy continues to have 2 exacerbations per year. His peripheral eosinophil count returns at 380 cells/µL. What treatment adjustment is most appropriate?",
+    "options": [
+      "Add an inhaled corticosteroid to form triple therapy",
+      "Switch to a PDE4 inhibitor alone, discontinuing all bronchodilators",
+      "Start long-term oral corticosteroids as maintenance",
+      "Add azithromycin without addressing eosinophilia"
+    ],
+    "answer": 0,
+    "e": "An eosinophil count above 300 cells/µL in a patient with ongoing exacerbations despite dual bronchodilator therapy supports adding ICS to form LAMA/LABA/ICS triple therapy, per both the eosinophil-guided ICS principle and the Group E algorithm."
+  },
+  {
+    "q": "A COPD patient presents with worsening dyspnea, increased sputum purulence, and a fever. Chest X-ray shows a new focal consolidation. How does this change the standard AECOPD management?",
+    "options": [
+      "Antibiotics are clearly indicated given purulent sputum and fever, and the consolidation should prompt treatment as pneumonia rather than a pure COPD flare",
+      "No antibiotics are needed since this is a routine AECOPD",
+      "Chest X-ray findings are irrelevant to antibiotic decision-making in COPD",
+      "Only NIV is required, with no role for antibiotics regardless of CXR findings"
+    ],
+    "answer": 0,
+    "e": "Purulent sputum and fever already meet criteria for antibiotics in AECOPD, and the new focal consolidation on CXR indicates a complicating pneumonia, reinforcing (and potentially broadening) the need for antibiotic therapy beyond the standard AECOPD regimen."
+  },
+  {
+    "q": "A COPD patient on nasal cannula oxygen for hypoxemia becomes progressively more somnolent, with a rising PaCO2 on repeat ABG despite improved oxygenation. What is the most likely explanation?",
+    "options": [
+      "Oxygen-induced hypercapnia from worsened V/Q mismatch and/or blunted hypoxic respiratory drive",
+      "A new pulmonary embolism unrelated to oxygen therapy",
+      "Spontaneous resolution of his COPD exacerbation",
+      "An allergic reaction to the oxygen delivery device"
+    ],
+    "answer": 0,
+    "e": "Rising PaCO2 and somnolence after starting supplemental oxygen is classic for oxygen-induced hypercapnia (CO2 narcosis), from a combination of worsened V/Q matching and blunting of hypoxic ventilatory drive — reinforcing the need for controlled, titrated oxygen and frequent blood gas checks."
+  },
+  {
+    "q": "A 58-year-old with GOLD 3 COPD and cor pulmonale on exam (hepatomegaly, elevated JVP, peripheral edema) has a resting SpO2 of 91% and PaO2 62 mmHg. Does he meet criteria for long-term oxygen therapy?",
+    "options": [
+      "Yes, because his PaO2 falls in the 55–60 mmHg-adjacent range with evidence of right heart failure, one of the qualifying comorbidities",
+      "No, because his PaO2 is above 55 mmHg and he has no other qualifying features",
+      "No, because LTOT is reserved exclusively for PaO2 below 40 mmHg",
+      "Yes, but only if his FEV1 is also below 20% predicted"
+    ],
+    "answer": 0,
+    "e": "Even though his PaO2 doesn't meet the automatic <55 mmHg threshold, patients with PaO2 in the intermediate range (roughly 55–60 mmHg) qualify for LTOT if they have pulmonary hypertension or right heart failure (peripheral edema, hepatomegaly) — both present here."
+  },
+  {
+    "q": "A patient with severe emphysema is being evaluated for lung volume reduction surgery. Imaging shows predominantly lower-lobe disease with a markedly reduced DLCO and mild pulmonary hypertension on echocardiogram. Is he an appropriate candidate?",
+    "options": [
+      "No, because LVRS requires upper-lobe-predominant disease, preserved gas transfer, and no pulmonary hypertension — none of which he meets",
+      "Yes, because any pattern of emphysema qualifies for LVRS as long as DLCO is reduced",
+      "Yes, because pulmonary hypertension is actually an indication for LVRS, not a contraindication",
+      "No, because LVRS is only appropriate for chronic bronchitis, not emphysema"
+    ],
+    "answer": 0,
+    "e": "LVRS candidacy specifically requires upper-lobe-predominant emphysema, preserved (not reduced) gas transfer, and absence of pulmonary hypertension — this patient meets none of these criteria, making him a poor candidate."
+  }
+];
+</script>
+
+<script>
+/* ===== Quiz engine ===== */
+(function(){
+  const bank = QUESTIONS.map(q=>({...q}));
+  const quizEl = document.getElementById('quiz');
+  const totalEl = document.getElementById('total');
+  const answeredEl = document.getElementById('answered');
+  const scorepillEl = document.getElementById('scorepill');
+  const barfill = document.getElementById('barfill');
+  const submitBtn = document.getElementById('submitBtn');
+  const submitRow = document.getElementById('submitRow');
+  const hint = document.getElementById('hint');
+  const resultEl = document.getElementById('result');
+  const LETTERS = ['A','B','C','D','E','F'];
+  const PASS = 70;
+
+  let state = [];
+
+  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+  function build(){
+    quizEl.innerHTML='';
+    state = bank.map(()=>({answered:false,correct:false}));
+    totalEl.textContent = bank.length;
+
+    bank.forEach((item,qi)=>{
+      // shuffle options, track correct index
+      const order = shuffle(item.options.map((t,idx)=>({t,idx})));
+      const correctPos = order.findIndex(o=>o.idx===item.answer);
+
+      const card = document.createElement('div');
+      card.className='q';
+      card.id='q'+qi;
+
+      const head = document.createElement('div');
+      head.className='q-head';
+      head.innerHTML = `<span class="q-num">Q${String(qi+1).padStart(2,'0')}</span><span class="q-text"></span>`;
+      head.querySelector('.q-text').textContent = item.q;
+      card.appendChild(head);
+
+      const opts = document.createElement('div');
+      opts.className='opts';
+      order.forEach((o,pos)=>{
+        const b = document.createElement('button');
+        b.className='opt';
+        b.innerHTML = `<span class="tag">${LETTERS[pos]}</span><span class="txt"></span><span class="mark"></span>`;
+        b.querySelector('.txt').textContent = o.t;
+        b.addEventListener('click',()=>choose(qi,pos,correctPos,opts,exp));
+        opts.appendChild(b);
+      });
+      card.appendChild(opts);
+
+      const exp = document.createElement('div');
+      exp.className='explain';
+      exp.innerHTML = `<b>Why:</b> ${item.e}`;
+      card.appendChild(exp);
+
+      quizEl.appendChild(card);
+    });
+    update();
+  }
+
+  function choose(qi,pos,correctPos,optsEl,expEl){
+    if(state[qi].answered) return;
+    state[qi].answered=true;
+    state[qi].correct = (pos===correctPos);
+    const buttons=[...optsEl.children];
+    buttons.forEach((b,i)=>{
+      b.disabled=true;
+      if(i===correctPos){b.classList.add('correct');b.querySelector('.mark').textContent='✓';}
+      if(i===pos && pos!==correctPos){b.classList.add('wrong');b.querySelector('.mark').textContent='✗';}
+    });
+    expEl.classList.add('show');
+    update();
+  }
+
+  function update(){
+    const answered = state.filter(s=>s.answered).length;
+    const correct = state.filter(s=>s.correct).length;
+    answeredEl.textContent = answered;
+    scorepillEl.textContent = correct+' correct';
+    barfill.style.width = (answered/bank.length*100)+'%';
+    const done = answered===bank.length;
+    submitBtn.disabled = !done;
+    hint.textContent = done ? 'All answered — lock in your score' : (bank.length-answered)+' left';
+  }
+
+  submitBtn.addEventListener('click',()=>{
+    const correct = state.filter(s=>s.correct).length;
+    const pct = Math.round(correct/bank.length*100);
+    const pass = pct>=PASS;
+    resultEl.className='result show '+(pass?'pass':'fail');
+    document.getElementById('verdict').textContent = pass?'Pass':'Keep reviewing';
+    document.getElementById('bigscore').textContent = pct+'%';
+    document.getElementById('resultDetail').textContent =
+      `${correct} of ${bank.length} correct · passing mark is ${PASS}%`;
+    submitRow.style.display='none';
+    resultEl.scrollIntoView({behavior:'smooth',block:'center'});
+  });
+
+  window.retry=function(){
+    resultEl.className='result';
+    submitRow.style.display='';
+    build();
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+
+  build();
+})();
+</script>
+</body>
+</html>
